@@ -1,11 +1,12 @@
 import { test, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
-import { fetchVbeeVoices } from './voice-tools'
+import { fetchVbeeVoices, getOrSetVoiceCache, clearVoiceCache } from './voice-tools'
 
 const originalFetch = globalThis.fetch
 
 afterEach(() => {
   globalThis.fetch = originalFetch
+  clearVoiceCache()
 })
 
 const baseCfg = {
@@ -68,4 +69,26 @@ test('fetchVbeeVoices on non-ok response', async () => {
 test('fetchVbeeVoices response missing voices', async () => {
   globalThis.fetch = async () => jsonResponse({ status: 0, result: {} }) as any
   await assert.rejects(fetchVbeeVoices(baseCfg), /missing result\.voices/)
+})
+
+test('getOrSetVoiceCache: cache hit on second call skips fetcher', async () => {
+  const fake = [{ voiceCode: 'v1', displayName: 'V1' }]
+  let calls = 0
+  const fetcher = async () => { calls++; return fake }
+  const first = await getOrSetVoiceCache('key-a', 60_000, fetcher)
+  const second = await getOrSetVoiceCache('key-a', 60_000, fetcher)
+  assert.equal(calls, 1)
+  assert.equal(first.cached, false)
+  assert.equal(second.cached, true)
+  assert.equal(second.value, fake)
+})
+
+test('getOrSetVoiceCache: fetcher exception propagates (caller handles degraded)', async () => {
+  let calls = 0
+  const fetcher = async () => { calls++; throw new Error('upstream 500') }
+  await assert.rejects(getOrSetVoiceCache('key-b', 60_000, fetcher), /upstream 500/)
+  assert.equal(calls, 1)
+  // second call with same key + failed fetcher still hits the catch path
+  await assert.rejects(getOrSetVoiceCache('key-b', 60_000, fetcher), /upstream 500/)
+  assert.equal(calls, 2)
 })
