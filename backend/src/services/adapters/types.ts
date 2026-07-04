@@ -56,6 +56,15 @@ export interface VideoProviderAdapter {
 
   parsePollResponse(result: any): VideoPollResponse
 
+  /**
+   * Optional: build a request to fetch the final asset URL after the polling
+   * response indicates success but only returns a file_id (e.g. MiniMax).
+   */
+  buildFileRetrieveRequest?(config: AIConfig, fileId: string): ProviderRequest
+
+  /** Optional: parse the file-retrieve response into a playable video URL. */
+  parseFileRetrieveResponse?(result: any): string | null
+
   extractVideoUrl(result: any): string | null
 }
 
@@ -121,6 +130,8 @@ export interface VideoGenResponse {
 export interface VideoPollResponse {
   status: 'pending' | 'processing' | 'completed' | 'failed'
   videoUrl?: string
+  /** Set when the poll response indicates success but only returns a file_id (e.g. MiniMax). */
+  fileId?: string
   error?: string
 }
 

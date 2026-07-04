@@ -221,6 +221,21 @@ async function pollVideoTask(id: number, config: AIConfig, taskId: string, story
         await handleVideoComplete(id, pollResp.videoUrl, null, storyboardId)
         return
       }
+      if (pollResp.status === 'completed' && pollResp.fileId && adapter.buildFileRetrieveRequest) {
+        const { url: fileUrl, method: fileMethod, headers: fileHeaders } = adapter.buildFileRetrieveRequest(config, pollResp.fileId)
+        logTaskProgress('VideoTask', 'file-retrieve', { id, taskId, fileId: pollResp.fileId, url: redactUrl(fileUrl) })
+        const fileResp = await fetch(fileUrl, { method: fileMethod, headers: fileHeaders })
+        if (fileResp.ok) {
+          const fileResult = await fileResp.json() as any
+          const videoUrl = adapter.parseFileRetrieveResponse?.(fileResult)
+          if (videoUrl) {
+            logTaskSuccess('VideoTask', 'poll-complete', { id, taskId, videoUrl })
+            await handleVideoComplete(id, videoUrl, null, storyboardId)
+            return
+          }
+        }
+        logTaskWarn('VideoTask', 'file-retrieve-failed', { id, taskId, fileId: pollResp.fileId })
+      }
       if (pollResp.status === 'failed') {
         logTaskError('VideoTask', 'poll-failed', { id, taskId, error: pollResp.error || 'Video generation failed' })
         throw new Error(pollResp.error || 'Video generation failed')
