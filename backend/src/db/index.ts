@@ -359,6 +359,17 @@ ensureColumn('episodes', 'image_config_id', 'INTEGER')
 ensureColumn('episodes', 'video_config_id', 'INTEGER')
 ensureColumn('episodes', 'audio_config_id', 'INTEGER')
 
+const PROVIDER_TS = new Date().toISOString()
+sqlite.exec(`
+  INSERT OR IGNORE INTO ai_service_providers
+    (name, display_name, service_type, provider, default_url, preset_models, description, is_active, created_at, updated_at)
+  VALUES
+    ('vbee', 'Vbee TTS', 'audio', 'vbee', 'https://api.vbee.vn',
+     '${JSON.stringify(['hn_female_ngochuyen_full_48k-fhg', 'sg_female_tuongvy_full_48k-fhg', 'sg_female_lantrinh_full_48k-fhg'])}',
+     'Vietnamese TTS — sync mode, Bearer + app-id auth', 1,
+     '${PROVIDER_TS}', '${PROVIDER_TS}');
+`)
+
 export const db = drizzle(sqlite, { schema })
 export { schema }
 export type DB = typeof db
