@@ -302,7 +302,7 @@
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
             </div>
             <div class="empty-title">Assign suitable voices to characters</div>
-            <div class="empty-desc">AI auto-assigns the best-matching TTS voice based on each character's features</div>
+            <div class="empty-desc">AI auto-assigns the best-matching TTS voice based on each character features</div>
             <button class="btn btn-primary" @click="dovoice">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               AI auto-assign
@@ -388,7 +388,7 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                     {{ (c.voice_sample_url || c.voicesampleUrl) ? 'Re-listen' : 'generate sample' }}
                   </button>
-                  <span class="dim" style="font-size:11px">{{ (c.voice_sample_url || c.voicesampleUrl) ? 'voice sample generated; can play directly' : 'generate to quickly confirm the character's voice' }}</span>
+                  <span class="dim" style="font-size:11px">{{ (c.voice_sample_url || c.voicesampleUrl) ? 'voice sample generated; can play directly' : "generate to quickly confirm the character's voice" }}</span>
                 </div>
 
                 <div v-if="c.voice_sample_url || c.voicesampleUrl" class="voice-player">
@@ -660,7 +660,7 @@
                   <label class="field">
                     <span class="field-label">Video Prompt</span>
                     <textarea :value="selectedSb.video_prompt || selectedSb.videoPrompt || ''" class="textarea" rows="5"
-                      @blur="updateField(selectedSb, 'video_prompt', $event.target.value)" placeholder="Press 3 secminsection'sVideoprompt..." />
+                      @blur="updateField(selectedSb, 'video_prompt', $event.target.value)" placeholder="Split into 3-second sections video prompt..." />
                   </label>
                   <div class="field-grid field-grid-2">
                     <label class="field">
@@ -907,7 +907,7 @@
               <div class="grid-history-head">
                 <div>
                   <div class="grid-history-title">grid image History</div>
-                  <div class="grid-history-subtitle">Expand to switch between grid images. They don't take up the first screen by default.</div>
+                  <div class="grid-history-subtitle">Expand to switch between grid images. They do not take up the first screen by default.</div>
                 </div>
                 <button class="btn btn-sm" @click="showAllgridHistory = !showAllgridHistory">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline :points="showAllgridHistory ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/></svg>
@@ -1438,7 +1438,7 @@
 <script setup>
 import { toast } from 'vue-sonner'
 import {
-  Users, MapPin, Video, imageIcon, Layers, Mic2, FileText, FolderKanban, Clapperboard, Download,
+  Users, MapPin, Video, Image, Layers, Mic2, FileText, FolderKanban, Clapperboard, Download,
 } from 'lucide-vue-next'
 import { dramaAPI, episodeAPI, storyboardAPI, characterAPI, sceneAPI, imageAPI, videoAPI, composeAPI, mergeAPI, gridAPI, aiConfigAPI, voicesAPI } from '~/composables/useApi'
 import { useAgent } from '~/composables/useAgent'
@@ -1609,8 +1609,8 @@ const gridAssignmentPage = ref(0)
 const gridStorageKey = computed(() => `huobao:grid:${dramaId}:${epId.value || episodeNumber}`)
 
 const gridModes = [
-  { id: 'first_frame', label: 'First Frame', desc: 'percell=oneshots'sFirst Frame' },
-  { id: 'first_last', label: 'FirstLast Frame', desc: 'pershotone line：leftFirst Frame，rightLast Frame' },
+  { id: 'first_frame', label: 'First Frame', desc: 'per cell one shot first frame' },
+  { id: 'first_last', label: 'First Last Frame', desc: 'per shot one line: left first frame, right last frame' },
   { id: 'multi_ref', label: 'multiReference', desc: 'all cells are different reference images of the same shot' },
 ]
 
@@ -1889,7 +1889,7 @@ function parsegridLayoutFromFrameType(value) {
 
 function continuegridSplit() {
   if (!gridimagePath.value) {
-    toast.warning('stillnothascanContinue splitting'sgrid image')
+    toast.warning('still no further splittable grid image')
     return
   }
   if (!gridAssignmentsState.value.length) resetgridAssignments()
@@ -2084,7 +2084,7 @@ const prodTabDefs = computed(() => [
   { id: 'chars', label: 'Character Portraits', icon: Users, badge: visualCharTotal.value ? `${charImgCount.value}/${visualCharTotal.value}` : '' },
   { id: 'scenes', label: 'sceneimage', icon: MapPin, badge: sceneImgCount.value ? `${sceneImgCount.value}/${scenes.value.length}` : '' },
   { id: 'dubbing', label: 'voicegenerate', icon: Mic2, badge: '' },
-  { id: 'shots', label: 'shotimage', icon: imageIcon, badge: shotImgCount.value ? `${shotImgCount.value}/${sbs.value.length}` : '' },
+  { id: 'shots', label: 'shotimage', icon: Image, badge: shotImgCount.value ? `${shotImgCount.value}/${sbs.value.length}` : '' },
   { id: 'videos', label: 'Videogenerate', icon: Video, badge: shotVidCount.value ? `${shotVidCount.value}/${sbs.value.length}` : '' },
   { id: 'compose', label: 'Videocompose', icon: Layers, badge: composedCount.value ? `${composedCount.value}/${sbs.value.length}` : '' },
 ])
@@ -2115,7 +2115,7 @@ const sidebarSections = computed(() => ([
       { key: 'prod:chars', label: 'Character Portraits', desc: '', icon: Users, done: prodStepDone('chars') },
       { key: 'prod:scenes', label: 'sceneimage', desc: '', icon: MapPin, done: prodStepDone('scenes') },
       { key: 'prod:dubbing', label: 'voicegenerate', desc: '', icon: Mic2, done: prodStepDone('dubbing') },
-      { key: 'prod:shots', label: 'shotimage', desc: '', icon: imageIcon, done: prodStepDone('shots') },
+      { key: 'prod:shots', label: 'shotimage', desc: '', icon: Image, done: prodStepDone('shots') },
       { key: 'prod:videos', label: 'Videogenerate', desc: '', icon: Video, done: prodStepDone('videos') },
       { key: 'prod:compose', label: 'Videocompose', desc: '', icon: Layers, done: prodStepDone('compose') },
     ],
@@ -2456,7 +2456,7 @@ function dovoice() { runAgent('voice_assigner', 'pleaseissohascharacterassign su
 async function batchGensamples() {
   const pending = chars.value.filter(c => (c.voice_style || c.voiceStyle) && !(c.voice_sample_url || c.voicesampleUrl))
   if (!pending.length) {
-    toast.info(charsvoiced.value ? 'sohascharacter'sVoice samplegenerated' : 'Please assign a voice first')
+    toast.info(charsvoiced.value ? 'all character voice samples generated' : 'Please assign a voice first')
     return
   }
   const results = await Promise.allSettled(pending.map(c => characterAPI.voicesample(c.id, epId.value)))
