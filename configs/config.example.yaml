@@ -1,5 +1,5 @@
 app:
-  name: "Huobao Drama API"
+  name: "Drama API"
   version: "1.0.0"
   debug: true
   language: "en" # System language: zh (Chinese) or en (English)
