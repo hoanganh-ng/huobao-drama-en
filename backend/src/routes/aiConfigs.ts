@@ -189,6 +189,7 @@ app.post('/huobao-preset', async (c) => {
       model: JSON.stringify([preset.model]),
       priority: preset.priority,
       isActive: true,
+      settings: preset.provider === 'vbee' ? JSON.stringify({ app_id: '' }) : undefined,
       updatedAt: ts,
     }
 
@@ -341,6 +342,7 @@ app.put('/:id', async (c) => {
   if ('model' in body) updates.model = JSON.stringify(body.model)
   if ('priority' in body) updates.priority = body.priority
   if ('is_active' in body) updates.isActive = body.is_active
+  if ('settings' in body) updates.settings = body.settings
 
   db.update(schema.aiServiceConfigs).set(updates).where(eq(schema.aiServiceConfigs.id, id)).run()
   return success(c)

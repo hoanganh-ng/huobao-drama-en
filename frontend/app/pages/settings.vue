@@ -311,6 +311,7 @@
           <span class="mono">{{ endpointHint }}</span>
         </div>
         <label class="field"><span class="field-label">Models (comma-separated)</span><input v-model="cfgForm.modelStr" class="input" placeholder="model-name" /></label>
+        <label class="field"><span class="field-label">Provider Settings (JSON)</span><textarea v-model="cfgForm.settings" class="input" rows="3" placeholder='{"app_id":"..."}'></textarea><span class="field-hint">JSON for provider-specific options (e.g. <code>{"app_id":"..."}</code> for Vbee)</span></label>
         <div v-if="cfgTestResult" class="test-result" :class="{ ok: cfgTestResult.reachable, bad: !cfgTestResult.reachable }">
           <div class="test-result-head">
             <span class="tag" :class="cfgTestResult.reachable ? 'tag-success' : 'tag-error'">{{ cfgTestResult.status || 'ERROR' }}</span>
@@ -418,10 +419,10 @@ const cfgEditId = ref(null)
 const presetDialog = ref(false)
 const cfgTesting = ref(false)
 const cfgTestResult = ref(null)
-const cfgForm = reactive({ name: '', provider: '', api_key: '', base_url: '', modelStr: '', service_type: 'text', priority: 0 })
+const cfgForm = reactive({ name: '', provider: '', api_key: '', base_url: '', modelStr: '', settings: '', service_type: 'text', priority: 0 })
 const huobaoForm = reactive({ apiKey: '' })
 const serviceTypes = [{ type: 'text', label: 'Text' }, { type: 'image', label: 'Image' }, { type: 'video', label: 'Video' }, { type: 'audio', label: 'Audio' }]
-const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine']
+const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine', 'vbee']
 const providerSelectOptions = computed(() => providers.map(p => ({ label: p, value: p })))
 const serviceMeta = {
   text: { label: 'Text', desc: 'Text capability for Agents: script rewriting, character & scene extraction, storyboard breaking, etc.' },
@@ -496,7 +497,7 @@ async function delCfg(id) { await aiConfigAPI.del(id); toast.success('Deleted');
 function startAddCfg(t) {
   cfgEditId.value = null
   cfgTestResult.value = null
-  Object.assign(cfgForm, { name: '', provider: '', api_key: '', base_url: '', modelStr: '', service_type: t, priority: 0 })
+  Object.assign(cfgForm, { name: '', provider: '', api_key: '', base_url: '', modelStr: '', settings: '', service_type: t, priority: 0 })
   const firstPreset = presetsByType(t)[0]
   if (firstPreset) applyProviderPreset(t, firstPreset.provider)
   cfgDialog.value = true
@@ -512,6 +513,7 @@ function startEditCfg(c) {
     modelStr: fmtModel(c.model),
     service_type: c.service_type,
     priority: c.priority ?? 0,
+    settings: c.settings || '',
   })
   cfgDialog.value = true
 }
@@ -550,8 +552,8 @@ async function saveCfg() {
   if (!cfgForm.provider) { toast.warning('Select a provider'); return }
   const models = cfgForm.modelStr.split(',').map(s => s.trim()).filter(Boolean)
   try {
-    if (cfgEditId.value) await aiConfigAPI.update(cfgEditId.value, { name: cfgForm.name, provider: cfgForm.provider, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority })
-    else await aiConfigAPI.create({ service_type: cfgForm.service_type, provider: cfgForm.provider, name: cfgForm.name || `${cfgForm.provider}-${cfgForm.service_type}`, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority })
+    if (cfgEditId.value) await aiConfigAPI.update(cfgEditId.value, { name: cfgForm.name, provider: cfgForm.provider, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority, settings: cfgForm.settings })
+    else await aiConfigAPI.create({ service_type: cfgForm.service_type, provider: cfgForm.provider, name: cfgForm.name || `${cfgForm.provider}-${cfgForm.service_type}`, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority, settings: cfgForm.settings })
     cfgDialog.value = false; toast.success('Saved'); loadCfgs()
   } catch (e) { toast.error(e.message) }
 }
