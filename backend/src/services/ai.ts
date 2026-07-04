@@ -13,6 +13,7 @@ export interface AIConfig {
   baseUrl: string
   apiKey: string
   model: string
+  settings?: string | null
 }
 
 export function getTextProviderBaseUrl(config: AIConfig) {
@@ -59,6 +60,7 @@ export function getActiveConfig(serviceType: ServiceType): AIConfig | null {
     baseUrl: active.baseUrl,
     apiKey: active.apiKey,
     model: models[0] || '',
+    settings: active.settings,
   }
 }
 
@@ -101,5 +103,6 @@ export function getConfigById(id: number): AIConfig | null {
     baseUrl: row.baseUrl,
     apiKey: row.apiKey,
     model: models[0] || '',
+    settings: row.settings,
   }
 }
