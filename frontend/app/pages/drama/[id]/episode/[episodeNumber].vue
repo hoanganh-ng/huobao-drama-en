@@ -2491,7 +2491,7 @@ function watchAsyncResult(check, attempts = 24, delay = 2500) {
 async function genCharImg(id) {
   try {
     if (!isPendingCharimage(id)) pendingCharimageIds.value.push(id)
-    await characterAPI.generateimage(id, epId.value)
+    await characterAPI.generateImage(id, epId.value)
     toast.success('characterimageGenerating')
     await refresh()
     watchAsyncResult(() => {
@@ -2509,7 +2509,7 @@ function batchCharimages() {
   const ids = visualChars.value.filter(c => !(c.image_url || c.imageUrl)).map(c => c.id)
   if (!ids.length) { toast.info('sohascharacterimagegenerated'); return }
   pendingCharimageIds.value = [...new Set([...pendingCharimageIds.value, ...ids])]
-  characterAPI.batchimages(ids, epId.value).then(async () => {
+  characterAPI.batchImages(ids, epId.value).then(async () => {
     toast.success('characterimagebatch Generating')
     await refresh()
     watchAsyncResult(() => ids.every(id => {
@@ -2526,7 +2526,7 @@ function batchCharimages() {
 async function gensceneImg(id) {
   try {
     if (!isPendingsceneimage(id)) pendingsceneimageIds.value.push(id)
-    await sceneAPI.generateimage(id, epId.value)
+    await sceneAPI.generateImage(id, epId.value)
     toast.success('sceneimageGenerating')
     await refresh()
     watchAsyncResult(() => {
@@ -2544,7 +2544,7 @@ function batchsceneimages() {
   const ids = scenes.value.filter(s => !(s.image_url || s.imageUrl)).map(s => s.id)
   if (!ids.length) { toast.info('sohassceneimagegenerated'); return }
   pendingsceneimageIds.value = [...new Set([...pendingsceneimageIds.value, ...ids])]
-  ids.forEach(id => { sceneAPI.generateimage(id, epId.value).then(() => refresh()).catch(e => toast.error(e.message)) })
+  ids.forEach(id => { sceneAPI.generateImage(id, epId.value).then(() => refresh()).catch(e => toast.error(e.message)) })
   toast.success('sceneimagebatch Generating')
   watchAsyncResult(() => ids.every(id => {
     const scene = scenes.value.find(s => s.id === id)
