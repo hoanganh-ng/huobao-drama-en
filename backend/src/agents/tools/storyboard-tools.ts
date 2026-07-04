@@ -1,6 +1,6 @@
 /**
- * 分镜拆解 Agent 工具
- * 工厂函数模式 — 注入 episodeId + dramaId
+ * Storyboard Breaker Agent tools
+ * Factory pattern — injects episodeId + dramaId
  */
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
@@ -46,12 +46,12 @@ function validateStoryboardBindings(episodeId: number, sceneId: number | null | 
   const episodeCharacterIds = getEpisodeCharacterIds(episodeId)
 
   if (sceneId != null && !episodeSceneIds.has(sceneId)) {
-    throw new Error(`scene_id ${sceneId} 不属于当前集`)
+    throw new Error(`scene_id ${sceneId} does not belong to the current episode`)
   }
 
   const invalidCharacterIds = (characterIds || []).filter(id => !episodeCharacterIds.has(id))
   if (invalidCharacterIds.length) {
-    throw new Error(`character_ids 不属于当前集: ${invalidCharacterIds.join(', ')}`)
+    throw new Error(`character_ids not in the current episode: ${invalidCharacterIds.join(', ')}`)
   }
 }
 
@@ -296,10 +296,10 @@ export function createStoryboardTools(episodeId: number, dramaId: number) {
     },
   })
 
-  // 为宫格图生成整体提示词（分析选中镜头的描述，生成一个连贯的画格布局描述）
+  // Generate an overall prompt for a grid image (analyze selected shots' descriptions and produce a coherent cell-layout description)
   const generateGridPrompt = createTool({
     id: 'generate_grid_prompt',
-    description: '为宫格图生成整体画面描述。根据选中的镜头列表及其描述，生成一个连贯的宫格图提示词，用于一次性生成完整的宫格拼图。',
+    description: 'Generate the overall description for a grid image. Based on the selected shot list and their descriptions, produce a coherent grid prompt for one-shot generation of the full grid mosaic.',
     inputSchema: z.object({
       shots: z.array(z.object({
         shot_number: z.number(),
@@ -324,11 +324,11 @@ export function createStoryboardTools(episodeId: number, dramaId: number) {
       if (mode === 'multi_ref') {
         const sb = shots[0]
         const payload = {
-          grid_prompt: `电影级高质量参考图，${sb.description}，专业摄影，电影质感，4K分辨率，${rows}x${cols} 宫格统一风格参考图`,
+          grid_prompt: `Cinematic high-quality reference image, ${sb.description}, professional cinematography, cinematic quality, 4K resolution, ${rows}x${cols} grid unified style reference`,
           cell_prompts: shots.map(s => ({
             shot_number: s.shot_number,
             frame_type: 'reference',
-            prompt: `电影级高质量参考图，${s.description}，专业摄影，电影质感，4K分辨率，统一风格`,
+            prompt: `Cinematic high-quality reference image, ${s.description}, professional cinematography, cinematic quality, 4K resolution, unified style`,
           })),
         }
         logTaskSuccess('StoryboardTool', 'grid-prompt-complete', { episodeId, cells: payload.cell_prompts.length, mode })
@@ -341,16 +341,16 @@ export function createStoryboardTools(episodeId: number, dramaId: number) {
           cellPrompts.push({
             shot_number: s.shot_number,
             frame_type: 'first_frame',
-            prompt: `电影级高质量首帧，${s.description}，${s.shot_type || ''}，专业摄影，${rows}x${cols} 宫格风格统一`,
+            prompt: `Cinematic high-quality first frame, ${s.description}, ${s.shot_type || ''}, professional cinematography, ${rows}x${cols} grid unified style`,
           })
           cellPrompts.push({
             shot_number: s.shot_number,
             frame_type: 'last_frame',
-            prompt: `电影级高质量尾帧，${s.description}，${s.shot_type || ''}，专业摄影，${rows}x${cols} 宫格风格统一`,
+            prompt: `Cinematic high-quality last frame, ${s.description}, ${s.shot_type || ''}, professional cinematography, ${rows}x${cols} grid unified style`,
           })
         }
         const payload = {
-          grid_prompt: `${shots.length}个镜头首尾帧拼图，${shots.map(s => s.description).join(' | ')}，电影级画面，专业摄影，${rows}行${cols}列风格统一`,
+          grid_prompt: `First/last frame grid of ${shots.length} shots, ${shots.map(s => s.description).join(' | ')}, cinematic quality, professional cinematography, ${rows}x${cols} unified style`,
           cell_prompts: cellPrompts,
         }
         logTaskSuccess('StoryboardTool', 'grid-prompt-complete', { episodeId, cells: payload.cell_prompts.length, mode })
@@ -361,10 +361,10 @@ export function createStoryboardTools(episodeId: number, dramaId: number) {
       const cellPrompts = shots.slice(0, rows * cols).map(s => ({
         shot_number: s.shot_number,
         frame_type: 'first_frame',
-        prompt: `电影级高质量首帧，${s.description}，${s.shot_type || ''}，专业摄影，${rows}x${cols} 宫格风格统一`,
+        prompt: `Cinematic high-quality first frame, ${s.description}, ${s.shot_type || ''}, professional cinematography, ${rows}x${cols} grid unified style`,
       }))
       const payload = {
-        grid_prompt: `${shots.length}个镜头首帧拼图，${shots.map(s => s.description).join(' | ')}，电影级画面，专业摄影，${rows}行${cols}列风格统一`,
+        grid_prompt: `First-frame grid of ${shots.length} shots, ${shots.map(s => s.description).join(' | ')}, cinematic quality, professional cinematography, ${rows}x${cols} unified style`,
         cell_prompts: cellPrompts,
       }
       logTaskSuccess('StoryboardTool', 'grid-prompt-complete', { episodeId, cells: payload.cell_prompts.length, mode })

@@ -7,7 +7,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
           </svg>
-          返回
+          Back
         </button>
         <div class="head-info">
           <h1 class="page-title">{{ drama.title }}</h1>
@@ -16,12 +16,12 @@
             <span v-if="drama.style" class="meta-divider"></span>
             <span class="meta-item">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              {{ drama.characters?.length || 0 }} 角色
+              {{ drama.characters?.length || 0 }} characters
             </span>
             <span class="meta-divider"></span>
             <span class="meta-item">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
-              {{ drama.scenes?.length || 0 }} 场景
+              {{ drama.scenes?.length || 0 }} scenes
             </span>
           </div>
         </div>
@@ -30,7 +30,7 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        添加集
+        Add Episode
       </button>
     </div>
 
@@ -43,7 +43,7 @@
         <line x1="13" y1="8" x2="13" y2="16"/>
         <line x1="16" y1="8" x2="16" y2="16"/>
       </svg>
-      剧集列表
+      Episode List
     </div>
 
     <div class="ep-grid">
@@ -59,7 +59,7 @@
           <span class="ep-title">{{ ep.title }}</span>
           <div class="ep-status">
             <span :class="['status-dot', hasScript(ep) ? 'dot-ready' : 'dot-pending']"></span>
-            <span class="status-text">{{ hasScript(ep) ? '已完成剧本' : '待编写' }}</span>
+            <span class="status-text">{{ hasScript(ep) ? 'Script ready' : 'Pending script' }}</span>
             <span v-if="ep.duration" class="ep-duration">{{ ep.duration }}s</span>
           </div>
         </div>
@@ -79,7 +79,7 @@
             <line x1="8" y1="12" x2="16" y2="12"/>
           </svg>
         </div>
-        <p>点击上方「添加集」创建第一集</p>
+        <p>Click "Add Episode" above to create the first episode</p>
       </div>
     </div>
 
@@ -89,59 +89,59 @@
           <div class="dialog-head-copy">
             <div class="dialog-kicker">Episode Setup</div>
             <div class="dialog-title-row">
-              <div class="dialog-title">创建新集</div>
-              <span class="dialog-badge">配置将锁定</span>
+              <div class="dialog-title">Create New Episode</div>
+              <span class="dialog-badge">Config will be locked</span>
             </div>
-            <div class="dialog-sub">为这一集预先锁定图片、视频和音频生成服务。创建后，这些生成链路将始终跟随当前集配置。</div>
+            <div class="dialog-sub">Pre-lock image, video, and audio generation services for this episode. After creation, these generation paths will always follow the current episode configuration.</div>
           </div>
-          <button class="back-btn" @click="addDialog = false">取消</button>
+          <button class="back-btn" @click="addDialog = false">Cancel</button>
         </div>
         <div class="dialog-summary">
-          <div class="summary-chip">图片 · {{ imageConfigs.length }} 可选</div>
-          <div class="summary-chip">视频 · {{ videoConfigs.length }} 可选</div>
-          <div class="summary-chip">音频 · {{ audioConfigs.length }} 可选</div>
+          <div class="summary-chip">Image · {{ imageConfigs.length }} available</div>
+          <div class="summary-chip">Video · {{ videoConfigs.length }} available</div>
+          <div class="summary-chip">Audio · {{ audioConfigs.length }} available</div>
         </div>
         <div class="dialog-body">
           <div class="dialog-section">
             <div class="dialog-section-head">
-              <span class="dialog-section-title">基础信息</span>
-              <span class="dialog-section-copy">这一项只影响显示名称，不影响生成配置</span>
+              <span class="dialog-section-title">Basic Information</span>
+              <span class="dialog-section-copy">This only affects the display name, not the generation config</span>
             </div>
             <label class="field">
-              <span class="field-label">标题</span>
-              <input v-model="newEpisodeTitle" class="input" placeholder="默认按集数自动命名" />
-              <span class="field-hint">留空时会自动按集数命名，例如“第 3 集”。</span>
+              <span class="field-label">Title</span>
+              <input v-model="newEpisodeTitle" class="input" placeholder="Auto-named by episode number" />
+              <span class="field-hint">Leave blank to auto-name by episode number, e.g. "Episode 3".</span>
             </label>
           </div>
 
           <div class="dialog-section">
             <div class="dialog-section-head">
-              <span class="dialog-section-title">生成配置</span>
-              <span class="dialog-section-copy">创建后不可更改，建议在这里一次性选对</span>
+              <span class="dialog-section-title">Generation Configuration</span>
+              <span class="dialog-section-copy">Cannot be changed after creation. Please pick carefully.</span>
             </div>
             <div class="config-grid">
               <label class="config-card">
                 <span class="config-card-kicker">IMAGE</span>
-                <span class="field-label">图片配置</span>
-                <BaseSelect v-model="newEpisodeImageConfigId" :options="imageConfigOptions" placeholder="选择图片服务" searchable />
+                <span class="field-label">Image Config</span>
+                <BaseSelect v-model="newEpisodeImageConfigId" :options="imageConfigOptions" placeholder="Select image service" searchable />
               </label>
               <label class="config-card">
                 <span class="config-card-kicker">VIDEO</span>
-                <span class="field-label">视频配置</span>
-                <BaseSelect v-model="newEpisodeVideoConfigId" :options="videoConfigOptions" placeholder="选择视频服务" searchable />
+                <span class="field-label">Video Config</span>
+                <BaseSelect v-model="newEpisodeVideoConfigId" :options="videoConfigOptions" placeholder="Select video service" searchable />
               </label>
               <label class="config-card">
                 <span class="config-card-kicker">AUDIO</span>
-                <span class="field-label">音频配置</span>
-                <BaseSelect v-model="newEpisodeAudioConfigId" :options="audioConfigOptions" placeholder="选择音频服务" searchable />
+                <span class="field-label">Audio Config</span>
+                <BaseSelect v-model="newEpisodeAudioConfigId" :options="audioConfigOptions" placeholder="Select audio service" searchable />
               </label>
             </div>
           </div>
         </div>
         <div class="dialog-foot">
-          <div class="dialog-foot-copy">创建后，工作台中的图片、视频、音频生成入口都会锁定到当前集。</div>
+          <div class="dialog-foot-copy">After creation, the image, video, and audio generation entry points in the workbench will all lock to this episode.</div>
           <button class="btn btn-primary" :disabled="creatingEpisode || !canCreateEpisode" @click="addEpisode">
-            {{ creatingEpisode ? '创建中...' : '创建并锁定配置' }}
+            {{ creatingEpisode ? 'Creating...' : 'Create and Lock Config' }}
           </button>
         </div>
       </div>
@@ -221,7 +221,7 @@ async function addEpisode() {
       video_config_id: newEpisodeVideoConfigId.value,
       audio_config_id: newEpisodeAudioConfigId.value,
     })
-    toast.success('已添加新集')
+    toast.success('New episode added')
     addDialog.value = false
     load()
   } catch (e) {

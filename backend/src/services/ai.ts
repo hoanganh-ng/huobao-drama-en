@@ -1,5 +1,5 @@
 /**
- * AI 服务抽象层 — 从数据库配置中获取 provider 和 API key
+ * AI service abstraction layer — fetches provider and API key from DB config
  */
 import { db, schema } from '../db/index.js'
 import { eq } from 'drizzle-orm'
@@ -38,7 +38,7 @@ export function getActiveConfig(serviceType: ServiceType): AIConfig | null {
     .where(eq(schema.aiServiceConfigs.serviceType, serviceType))
     .all()
     .filter(r => r.isActive)
-    .sort((a, b) => (b.priority || 0) - (a.priority || 0)) // 高优先级优先
+    .sort((a, b) => (b.priority || 0) - (a.priority || 0)) // Higher priority first
 
   const active = rows[0]
   if (!active) {
@@ -70,7 +70,7 @@ export function getTextConfig(): AIConfig {
 
 export function getAudioConfig(): AIConfig {
   const config = getActiveConfig('audio')
-  if (!config) throw new Error('No active audio AI config — 请在设置中添加音频服务')
+  if (!config) throw new Error('No active audio AI config — please add an audio service in Settings')
   return config
 }
 

@@ -1,8 +1,8 @@
 /**
- * Vidu 视频生成 Adapter
- * 端点: /ent/v2/img2video
- * 认证: Authorization: Token {apiKey} (不是 Bearer!)
- * 特点: Vidu 不提供轮询接口，依赖 Webhook 回调通知结果
+ * Vidu video generation Adapter
+ * Endpoint: /ent/v2/img2video
+ * Auth: Authorization: Token {apiKey} (NOT Bearer!)
+ * Vidu does not provide a polling endpoint; relies on webhook callbacks to notify results
  */
 import type {
   VideoProviderAdapter,
@@ -22,11 +22,11 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
 
     const body: any = {
       model,
-      images: [], // 将由调用方填充
+      images: [], // Filled by caller
       prompt: record.prompt,
     }
 
-    // 添加参考图
+    // Add reference images
     if (record.referenceMode === 'single' && record.imageUrl) {
       body.images.push(record.imageUrl)
     } else if (record.referenceMode === 'first_last') {
@@ -39,10 +39,10 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
       } catch {}
     }
 
-    // 可选参数
+    // Optional params
     if (record.duration) body.duration = record.duration
     if (record.aspectRatio) {
-      // Vidu 使用 resolution 参数而非 aspect ratio
+      // Vidu uses the resolution param, not aspect ratio
       const ratioMap: Record<string, string> = {
         '16:9': '720p',
         '9:16': '720p',
@@ -56,7 +56,7 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${config.apiKey}`, // 注意: 不是 Bearer!
+        'Authorization': `Token ${config.apiKey}`, // Note: NOT Bearer!
       },
       body,
     }
@@ -66,7 +66,7 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
     if (result.task_id) {
       return { isAsync: true, taskId: result.task_id }
     }
-    // 同步返回（不太可能发生）
+    // Sync return (very unlikely)
     if (result.video_url) {
       return { isAsync: false, videoUrl: result.video_url }
     }
@@ -74,13 +74,13 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
   }
 
   /**
-   * Vidu 不提供轮询接口！
-   * 这个方法不会被调用，轮询通过 Webhook 回调实现
-   * 这里返回一个无效的请求，让轮询立即结束并依赖 Webhook
+   * Vidu does not provide a polling endpoint!
+   * This method is never called; polling is done via webhook callbacks
+   * Return an invalid request so polling ends immediately and falls back to webhooks
    */
   buildPollRequest(config: AIConfig, taskId: string): ProviderRequest {
-    // Vidu 没有轮询端点，返回一个不可达的 URL
-    // 轮询会超时，最终依赖 Webhook 回调更新状态
+    // Vidu has no polling endpoint; return an unreachable URL
+    // Polling will time out and finally rely on webhook callbacks to update status
     return {
       url: 'vidu://no-polling-endpoint',
       method: 'GET',
@@ -90,8 +90,8 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
   }
 
   /**
-   * Vidu 轮询永远返回 processing，因为没有轮询端点
-   * 实际状态通过 Webhook 更新
+   * Vidu polling always returns processing because there is no polling endpoint
+   * Actual state is updated via webhook
    */
   parsePollResponse(result: any): VideoPollResponse {
     return { status: 'processing' }
@@ -102,8 +102,8 @@ export class ViduVideoAdapter implements VideoProviderAdapter {
   }
 
   /**
-   * Vidu 回调状态映射
-   * Webhook 路由使用此方法解析回调
+   * Vidu callback state mapping
+   * Webhook route uses this method to parse callbacks
    */
   static parseCallbackState(body: any): { status: 'completed' | 'failed'; videoUrl?: string; error?: string } {
     const state = body.state

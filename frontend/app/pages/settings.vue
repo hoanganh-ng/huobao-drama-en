@@ -2,7 +2,7 @@
   <div class="settings-layout">
     <aside class="settings-nav">
       <div class="nav-group">
-        <div class="nav-group-label">基础</div>
+        <div class="nav-group-label">BASIC</div>
         <button v-for="t in baseTabs" :key="t.id" :class="['nav-item', { active: tab === t.id }]" @click="tab = t.id">
           <component :is="t.icon" :size="14" />
           {{ t.label }}
@@ -10,14 +10,14 @@
       </div>
       <div class="nav-advanced">
         <label class="advanced-toggle">
-          <span>Agent 高级配置</span>
+          <span>Advanced Agent Configuration</span>
           <input type="checkbox" v-model="showAdvanced" />
           <span class="advanced-slider"></span>
         </label>
-        <p class="advanced-note">仅展开 Agent 配置与 Skills。工作台功能和分镜字段保持默认可见。</p>
+        <p class="advanced-note">Only shows Agent configuration and Skills. Workbench and storyboard fields stay visible by default.</p>
       </div>
       <div v-if="showAdvanced" class="nav-group">
-        <div class="nav-group-label">高级</div>
+        <div class="nav-group-label">ADVANCED</div>
         <button v-for="t in advancedTabs" :key="t.id" :class="['nav-item', { active: tab === t.id }]" @click="tab = t.id">
           <component :is="t.icon" :size="14" />
           {{ t.label }}
@@ -27,31 +27,31 @@
 
     <div class="settings-content">
 
-      <!-- ===== AI 服务配置 ===== -->
+      <!-- ===== AI Service Configuration ===== -->
       <div v-if="tab === 'ai'" class="settings-scroll">
         <div class="settings-head">
           <div class="settings-brand">
             <div class="settings-brand-mark">
-              <img v-if="showBrandImage" :src="brandLogo" alt="火宝短剧" class="settings-brand-logo" @error="showBrandImage = false" />
-              <span v-else class="settings-brand-fallback">火</span>
+              <img v-if="showBrandImage" :src="brandLogo" alt="Huobao Drama" class="settings-brand-logo" @error="showBrandImage = false" />
+              <span v-else class="settings-brand-fallback">H</span>
             </div>
             <div class="settings-brand-copy">
-              <div class="settings-brand-kicker">Huobao Shorts</div>
-              <div class="settings-brand-name">火宝短剧</div>
+              <div class="settings-brand-kicker">Huobao Drama</div>
+              <div class="settings-brand-name">Huobao Drama</div>
             </div>
           </div>
-          <h2 class="settings-title">AI 服务配置</h2>
-          <p class="settings-desc">先用推荐模板快速落配置，再按服务类型微调。工作台创建集时会锁定所选图片、视频和音频能力。</p>
+          <h2 class="settings-title">AI Service Configuration</h2>
+          <p class="settings-desc">Start with a recommended template, then fine-tune per service type. Creating an episode in the workbench will lock in the chosen image, video, and audio capabilities.</p>
         </div>
         <section class="setup-panel card">
           <div class="setup-panel-head">
             <div>
               <div class="setup-kicker">Quick Setup</div>
-              <div class="setup-title">火宝推荐配置</div>
-              <div class="setup-desc">一键写入文本、图片、视频、音频四类推荐配置，适合作为开箱默认方案。</div>
+              <div class="setup-title">Huobao Recommended Setup</div>
+              <div class="setup-desc">One-click write of the recommended configs for text, image, video, and audio — a solid out-of-the-box default.</div>
             </div>
             <button class="btn btn-primary" @click="presetDialog = true">
-              <Sparkles :size="14" /> 火宝一键配置
+              <Sparkles :size="14" /> Huobao One-Click Setup
             </button>
           </div>
           <div class="preset-grid">
@@ -68,8 +68,8 @@
         <section class="setup-panel card">
           <div class="setup-panel-head compact">
             <div>
-              <div class="setup-title">快捷模板</div>
-              <div class="setup-desc">选择服务类型后，直接用模板填充推荐的 `provider / base URL / model`。</div>
+              <div class="setup-title">Quick Templates</div>
+              <div class="setup-desc">Pick a service type and the template will fill in a recommended `provider / base URL / model`.</div>
             </div>
           </div>
           <div class="template-row">
@@ -90,8 +90,8 @@
                 <span class="section-title">{{ st.label }}</span>
                 <div class="section-subtitle">{{ serviceMeta[st.type].desc }}</div>
               </div>
-              <span v-if="countActive(st.type)" class="tag tag-accent">{{ countActive(st.type) }} 已启用</span>
-              <button class="btn btn-ghost btn-sm ml-auto" @click="startAddCfg(st.type)"><Plus :size="13" /> 添加</button>
+              <span v-if="countActive(st.type)" class="tag tag-accent">{{ countActive(st.type) }} active</span>
+              <button class="btn btn-ghost btn-sm ml-auto" @click="startAddCfg(st.type)"><Plus :size="13" /> Add</button>
             </div>
             <div class="config-list">
               <div v-for="c in byType(st.type)" :key="c.id" class="card config-row">
@@ -102,36 +102,36 @@
                       <span class="config-name">{{ c.name || `${c.provider}-${c.service_type}` }}</span>
                     </div>
                     <span class="config-model mono truncate">{{ fmtModel(c.model) }}</span>
-                    <span class="config-base mono truncate">{{ c.base_url || '未设置 Base URL' }}</span>
+                    <span class="config-base mono truncate">{{ c.base_url || 'No Base URL set' }}</span>
                   </div>
                 </div>
-                <span :class="['tag', c.api_key ? 'tag-success' : 'tag-error']">{{ c.api_key ? '已配置' : '无密钥' }}</span>
-                <button class="btn btn-ghost btn-sm" @click="testExistingCfg(c)">测试</button>
+                <span :class="['tag', c.api_key ? 'tag-success' : 'tag-error']">{{ c.api_key ? 'Configured' : 'No key' }}</span>
+                <button class="btn btn-ghost btn-sm" @click="testExistingCfg(c)">Test</button>
                 <label class="toggle"><input type="checkbox" :checked="c.is_active" @change="toggleCfg(c)"><span /></label>
                 <button class="btn btn-ghost btn-icon" @click="startEditCfg(c)"><Pencil :size="13" /></button>
                 <button class="btn btn-ghost btn-icon" @click="delCfg(c.id)"><Trash2 :size="13" /></button>
               </div>
-              <p v-if="!byType(st.type).length" class="config-empty">暂无配置</p>
+              <p v-if="!byType(st.type).length" class="config-empty">No configs yet</p>
             </div>
           </section>
         </div>
       </div>
 
-      <!-- ===== Agent 配置 ===== -->
+      <!-- ===== Agent Configuration ===== -->
       <div v-else-if="tab === 'agents'" class="settings-scroll">
         <div class="settings-head">
           <div class="settings-brand">
             <div class="settings-brand-mark">
-              <img v-if="showBrandImage" :src="brandLogo" alt="火宝短剧" class="settings-brand-logo" @error="showBrandImage = false" />
-              <span v-else class="settings-brand-fallback">火</span>
+              <img v-if="showBrandImage" :src="brandLogo" alt="Huobao Drama" class="settings-brand-logo" @error="showBrandImage = false" />
+              <span v-else class="settings-brand-fallback">H</span>
             </div>
             <div class="settings-brand-copy">
-              <div class="settings-brand-kicker">Huobao Shorts</div>
-              <div class="settings-brand-name">火宝短剧</div>
+              <div class="settings-brand-kicker">Huobao Drama</div>
+              <div class="settings-brand-name">Huobao Drama</div>
             </div>
           </div>
-          <h2 class="settings-title">Agent 配置</h2>
-          <p class="settings-desc">高级区只保留 Agent 运行配置。这里可以调整模型、提示词和参数，保存后立即生效。</p>
+          <h2 class="settings-title">Agent Configuration</h2>
+          <p class="settings-desc">Advanced area only contains Agent runtime configuration. Adjust model, prompt, and parameters here; changes take effect immediately on save.</p>
         </div>
         <div class="agent-list">
           <div v-for="a in agentDefs" :key="a.type" class="card agent-card">
@@ -141,14 +141,14 @@
                 <div style="font-weight:600;font-size:14px">{{ a.label }}</div>
                 <div class="dim" style="font-size:12px">{{ a.type }}</div>
               </div>
-              <span v-if="getAgentCfg(a.type)" class="tag tag-success">已配置</span>
-              <span v-else class="tag">默认</span>
+              <span v-if="getAgentCfg(a.type)" class="tag tag-success">Configured</span>
+              <span v-else class="tag">Default</span>
               <ChevronDown :size="14" :style="{ transform: editingAgent === a.type ? 'rotate(180deg)' : '', transition: '0.2s' }" />
             </div>
             <div v-if="editingAgent === a.type" class="agent-card-body">
               <label class="field">
-                <span class="field-label">模型 <span class="dim">(留空使用 AI 服务默认)</span></span>
-                <BaseSelect v-model="agentForm.model" :options="textModelSelectOptions" placeholder="— 使用 AI 服务默认 —" searchable />
+                <span class="field-label">Model <span class="dim">(blank to use AI service default)</span></span>
+                <BaseSelect v-model="agentForm.model" :options="textModelSelectOptions" placeholder="— Use AI service default —" searchable />
               </label>
               <div class="field-row">
                 <label class="field">
@@ -162,16 +162,16 @@
               </div>
               <label class="field">
                 <span class="field-label">System Prompt</span>
-                <textarea v-model="agentForm.system_prompt" class="textarea" rows="12" placeholder="Agent 系统提示词..." />
+                <textarea v-model="agentForm.system_prompt" class="textarea" rows="12" placeholder="Agent system prompt..." />
               </label>
               <div class="agent-card-foot">
-                <button class="btn btn-ghost btn-sm" @click="resetAgentPrompt(a.type)">恢复默认</button>
+                <button class="btn btn-ghost btn-sm" @click="resetAgentPrompt(a.type)">Reset to Default</button>
                 <span v-if="agentSaved === a.type" class="tag tag-success" style="margin-left:8px">
-                  <Check :size="10" /> 已保存
+                  <Check :size="10" /> Saved
                 </span>
                 <button class="btn btn-primary btn-sm ml-auto" :disabled="agentSaving" @click="saveAgentCfg(a.type)">
                   <Loader2 v-if="agentSaving" :size="12" class="animate-spin" />
-                  保存
+                  Save
                 </button>
               </div>
             </div>
@@ -179,11 +179,11 @@
         </div>
       </div>
 
-      <!-- ===== Skills 编辑 ===== -->
+      <!-- ===== Skills Editor ===== -->
       <div v-else-if="tab === 'skills'" class="skills-layout">
-        <!-- Agent 左侧列表 -->
+        <!-- Agent list (left) -->
         <aside class="skills-agent-list">
-          <div class="skills-agent-title">Agent 列表</div>
+          <div class="skills-agent-title">Agent List</div>
           <button
             v-for="a in agentDefs"
             :key="a.type"
@@ -196,17 +196,17 @@
           </button>
         </aside>
 
-        <!-- Skill 管理右侧主区域 -->
+        <!-- Skill management (right main area) -->
         <div class="settings-scroll skills-main">
           <div class="settings-head">
             <div class="settings-brand">
               <div class="settings-brand-mark">
-                <img v-if="showBrandImage" :src="brandLogo" alt="火宝短剧" class="settings-brand-logo" @error="showBrandImage = false" />
-                <span v-else class="settings-brand-fallback">火</span>
+                <img v-if="showBrandImage" :src="brandLogo" alt="Huobao Drama" class="settings-brand-logo" @error="showBrandImage = false" />
+                <span v-else class="settings-brand-fallback">H</span>
               </div>
               <div class="settings-brand-copy">
-                <div class="settings-brand-kicker">Huobao Shorts</div>
-                <div class="settings-brand-name">火宝短剧</div>
+                <div class="settings-brand-kicker">Huobao Drama</div>
+                <div class="settings-brand-name">Huobao Drama</div>
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:10px">
@@ -216,22 +216,22 @@
                 <div class="dim" style="font-size:12px">{{ selectedAgentType }} — Skills</div>
               </div>
             </div>
-            <p class="settings-desc" style="margin-top:10px">Skills 仅作为 Agent 的高级提示词层使用，不影响工作台常规功能入口。</p>
+            <p class="settings-desc" style="margin-top:10px">Skills are only an advanced prompt layer for the Agent; they do not affect workbench features.</p>
             <button class="btn btn-primary btn-sm" @click="startAddSkill">
-              <Plus :size="13" /> 新增 Skill
+              <Plus :size="13" /> Add Skill
             </button>
           </div>
 
-          <!-- 无 skill 提示 -->
+          <!-- Empty state when no skills -->
           <div v-if="!currentSkills.length" class="step-empty" style="padding:48px 24px">
             <div class="empty-visual">
               <FileText :size="28" />
             </div>
-            <div class="empty-title">暂无 Skill</div>
-            <div class="empty-desc">点击右上角「新增 Skill」创建第一个提示词文件</div>
+            <div class="empty-title">No Skills yet</div>
+            <div class="empty-desc">Click "Add Skill" in the top-right to create your first prompt file</div>
           </div>
 
-          <!-- Skill 列表 -->
+          <!-- Skill list -->
           <div class="skill-list" v-else>
             <div v-for="s in currentSkills" :key="s.id" class="card skill-card">
               <div class="skill-card-head" @click="toggleSkillEdit(s.id)">
@@ -251,16 +251,16 @@
                   class="textarea mono"
                   rows="20"
                   style="font-size:12px;line-height:1.6"
-                  placeholder="编写 SKILL.md 内容..."
+                  placeholder="Write SKILL.md content..."
                 />
                 <div class="skill-card-foot">
                   <span class="dim" style="font-size:11px">skills/{{ selectedAgentType }}/{{ s.id }}/SKILL.md</span>
                   <span v-if="skillSaved === s.id" class="tag tag-success" style="margin-left:8px">
-                    <Check :size="10" /> 已保存
+                    <Check :size="10" /> Saved
                   </span>
                   <button class="btn btn-primary btn-sm ml-auto" :disabled="skillSaving" @click="saveSkill(s.id)">
                     <Loader2 v-if="skillSaving" :size="12" class="animate-spin" />
-                    保存
+                    Save
                   </button>
                 </div>
               </div>
@@ -276,8 +276,8 @@
         <div class="config-modal-head">
           <div>
             <div class="setup-kicker">{{ cfgEditId ? 'Edit Config' : 'New Config' }}</div>
-            <h2 class="modal-title">{{ cfgEditId ? '编辑服务配置' : `添加${serviceMeta[cfgForm.service_type].label}服务` }}</h2>
-            <div class="modal-note">推荐先选择模板，系统会自动填入更合理的 `Base URL` 与默认模型。</div>
+            <h2 class="modal-title">{{ cfgEditId ? 'Edit Service Configuration' : `Add ${serviceMeta[cfgForm.service_type].label} Service` }}</h2>
+            <div class="modal-note">Pick a template first and the system will fill in a more reasonable `Base URL` and default model.</div>
           </div>
           <span class="tag tag-accent">{{ serviceMeta[cfgForm.service_type].label }}</span>
         </div>
@@ -293,24 +293,24 @@
           </button>
         </div>
         <label class="field">
-          <span class="field-label">配置名称</span>
-          <input v-model="cfgForm.name" class="input" placeholder="如 火宝默认图像服务" />
+          <span class="field-label">Configuration Name</span>
+          <input v-model="cfgForm.name" class="input" placeholder="e.g. Huobao Default Image Service" />
         </label>
-        <label class="field"><span class="field-label">服务商</span>
-          <BaseSelect v-model="cfgForm.provider" :options="providerSelectOptions" placeholder="选择服务商" searchable />
+        <label class="field"><span class="field-label">Provider</span>
+          <BaseSelect v-model="cfgForm.provider" :options="providerSelectOptions" placeholder="Select provider" searchable />
         </label>
         <label class="field">
-          <span class="field-label">优先级</span>
+          <span class="field-label">Priority</span>
           <input v-model.number="cfgForm.priority" class="input" type="number" min="0" max="999" />
-          <span class="field-hint">数值越高越优先。工作台默认会优先使用同类型里优先级最高的启用配置。</span>
+          <span class="field-hint">Higher = more priority. The workbench prefers the highest-priority active config of each type.</span>
         </label>
         <label class="field"><span class="field-label">API Key</span><input v-model="cfgForm.api_key" class="input" type="password" placeholder="sk-..." /></label>
         <label class="field"><span class="field-label">Base URL</span><input v-model="cfgForm.base_url" class="input" placeholder="https://..." /></label>
         <div class="endpoint-hint">
-          <span class="dim">实际端点前缀：</span>
+          <span class="dim">Actual endpoint prefix:</span>
           <span class="mono">{{ endpointHint }}</span>
         </div>
-        <label class="field"><span class="field-label">模型（逗号分隔）</span><input v-model="cfgForm.modelStr" class="input" placeholder="model-name" /></label>
+        <label class="field"><span class="field-label">Models (comma-separated)</span><input v-model="cfgForm.modelStr" class="input" placeholder="model-name" /></label>
         <div v-if="cfgTestResult" class="test-result" :class="{ ok: cfgTestResult.reachable, bad: !cfgTestResult.reachable }">
           <div class="test-result-head">
             <span class="tag" :class="cfgTestResult.reachable ? 'tag-success' : 'tag-error'">{{ cfgTestResult.status || 'ERROR' }}</span>
@@ -322,10 +322,10 @@
         <div class="modal-actions">
           <button type="button" class="btn btn-ghost" :disabled="cfgTesting" @click="testDraftCfg">
             <Loader2 v-if="cfgTesting" :size="12" class="animate-spin" />
-            <span v-else>测试配置</span>
+            <span v-else>Test Configuration</span>
           </button>
-          <button type="button" class="btn" @click="cfgDialog = false">取消</button>
-          <button type="submit" class="btn btn-primary">保存</button>
+          <button type="button" class="btn" @click="cfgDialog = false">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -336,16 +336,16 @@
         <div class="config-modal-head">
           <div>
             <div class="setup-kicker">Huobao Preset</div>
-            <h2 class="modal-title">火宝一键配置</h2>
-            <div class="modal-note">按火宝推荐链路自动创建或更新 4 条服务配置，并同时初始化 5 个 Agent 的默认模型。</div>
+            <h2 class="modal-title">Huobao One-Click Setup</h2>
+            <div class="modal-note">Auto-create or update 4 service configurations and initialize 5 Agents with the default models, per Huobao recommendations.</div>
           </div>
-          <span class="tag tag-success">推荐</span>
+          <span class="tag tag-success">Recommended</span>
         </div>
         <div class="huobao-grid">
           <label class="field">
-            <span class="field-label">Huobao API Key <span class="dim">(统一用于文本 / 图片 / 视频 / 音频)</span></span>
-            <input v-model="huobaoForm.apiKey" class="input" type="password" placeholder="用于 api.chatfire.site 全链路服务" />
-            <span class="field-hint">还没有账号？<a href="https://api.chatfire.site/" target="_blank" rel="noopener">立即注册 →</a></span>
+            <span class="field-label">Huobao API Key <span class="dim">(shared across Text / Image / Video / Audio)</span></span>
+            <input v-model="huobaoForm.apiKey" class="input" type="password" placeholder="Used for the api.chatfire.site full-stack services" />
+            <span class="field-hint">No account yet? <a href="https://api.chatfire.site/" target="_blank" rel="noopener">Sign up now →</a></span>
           </label>
         </div>
         <div class="preset-grid compact">
@@ -359,8 +359,8 @@
           </article>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn" @click="presetDialog = false">取消</button>
-          <button type="submit" class="btn btn-primary">创建并启用</button>
+          <button type="button" class="btn" @click="presetDialog = false">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create and Enable</button>
         </div>
       </form>
     </div>
@@ -368,22 +368,22 @@
     <!-- Add Skill Dialog -->
     <div v-if="addSkillDialog" class="overlay" @click.self="addSkillDialog = false">
       <form class="modal card" @submit.prevent="confirmAddSkill">
-        <h2 class="modal-title">新增 Skill — {{ selectedAgentLabel }}</h2>
+        <h2 class="modal-title">Add Skill — {{ selectedAgentLabel }}</h2>
         <label class="field">
-          <span class="field-label">Skill 目录名 <span class="dim">(英文，唯一)</span></span>
-          <input v-model="newSkillForm.id" class="input" placeholder="如 custom-extraction" />
+          <span class="field-label">Skill Directory Name <span class="dim">(English, unique)</span></span>
+          <input v-model="newSkillForm.id" class="input" placeholder="e.g. custom-extraction" />
         </label>
         <label class="field">
-          <span class="field-label">名称</span>
-          <input v-model="newSkillForm.name" class="input" placeholder="如 自定义提取规则" />
+          <span class="field-label">Name</span>
+          <input v-model="newSkillForm.name" class="input" placeholder="e.g. Custom Extraction Rules" />
         </label>
         <label class="field">
-          <span class="field-label">描述</span>
-          <input v-model="newSkillForm.description" class="input" placeholder="简短描述此 Skill 的用途" />
+          <span class="field-label">Description</span>
+          <input v-model="newSkillForm.description" class="input" placeholder="Briefly describe what this Skill does" />
         </label>
         <div class="modal-actions">
-          <button type="button" class="btn" @click="addSkillDialog = false">取消</button>
-          <button type="submit" class="btn btn-primary" :disabled="!newSkillForm.id">创建</button>
+          <button type="button" class="btn" @click="addSkillDialog = false">Cancel</button>
+          <button type="submit" class="btn btn-primary" :disabled="!newSkillForm.id">Create</button>
         </div>
       </form>
     </div>
@@ -401,10 +401,10 @@ const showBrandImage = ref(true)
 const tab = ref('ai')
 const showAdvanced = ref(false)
 const baseTabs = [
-  { id: 'ai', label: 'AI 服务', icon: Cpu },
+  { id: 'ai', label: 'AI Services', icon: Cpu },
 ]
 const advancedTabs = [
-  { id: 'agents', label: 'Agent 配置', icon: Bot },
+  { id: 'agents', label: 'Agent Configuration', icon: Bot },
   { id: 'skills', label: 'Skills', icon: FileText },
 ]
 watch(showAdvanced, (v) => {
@@ -420,40 +420,40 @@ const cfgTesting = ref(false)
 const cfgTestResult = ref(null)
 const cfgForm = reactive({ name: '', provider: '', api_key: '', base_url: '', modelStr: '', service_type: 'text', priority: 0 })
 const huobaoForm = reactive({ apiKey: '' })
-const serviceTypes = [{ type: 'text', label: '文本' }, { type: 'image', label: '图片' }, { type: 'video', label: '视频' }, { type: 'audio', label: '音频' }]
+const serviceTypes = [{ type: 'text', label: 'Text' }, { type: 'image', label: 'Image' }, { type: 'video', label: 'Video' }, { type: 'audio', label: 'Audio' }]
 const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine']
 const providerSelectOptions = computed(() => providers.map(p => ({ label: p, value: p })))
 const serviceMeta = {
-  text: { label: '文本', desc: '剧本改写、角色场景提取、分镜拆解等 Agent 文本能力' },
-  image: { label: '图片', desc: '角色图、场景图、镜头图与首尾帧等静态图像生成' },
-  video: { label: '视频', desc: '镜头视频生成，支持单图、多图和首尾帧模式' },
-  audio: { label: '音频', desc: '角色试听、旁白与对白语音生成' },
+  text: { label: 'Text', desc: 'Text capability for Agents: script rewriting, character & scene extraction, storyboard breaking, etc.' },
+  image: { label: 'Image', desc: 'Static image generation: character art, scene art, shot images, first/last frames' },
+  video: { label: 'Video', desc: 'Shot video generation — single-image, multi-image, and first/last-frame modes' },
+  audio: { label: 'Audio', desc: 'Character voice samples, narration, and dialogue synthesis' },
 }
 const providerPresets = {
   text: {
-    chatfire: { label: 'ChatFire 推荐', baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-preview'] },
-    openrouter: { label: 'OpenRouter 推荐', baseUrl: 'https://openrouter.ai/api', models: ['google/gemini-3-flash-preview'] },
-    openai: { label: 'OpenAI 推荐', baseUrl: 'https://api.openai.com', models: ['gpt-4.1-mini'] },
+    chatfire: { label: 'ChatFire Recommended', baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-preview'] },
+    openrouter: { label: 'OpenRouter Recommended', baseUrl: 'https://openrouter.ai/api', models: ['google/gemini-3-flash-preview'] },
+    openai: { label: 'OpenAI Recommended', baseUrl: 'https://api.openai.com', models: ['gpt-4.1-mini'] },
   },
   image: {
-    chatfire: { label: 'ChatFire 推荐', baseUrl: 'https://api.chatfire.site', models: ['doubao-seedream-4-5-251128'] },
-    gemini: { label: 'Gemini 推荐', baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-image-preview'] },
-    volcengine: { label: '火山推荐', baseUrl: 'https://ark.cn-beijing.volces.com', models: ['doubao-seedream-4-0-250828'] },
+    chatfire: { label: 'ChatFire Recommended', baseUrl: 'https://api.chatfire.site', models: ['doubao-seedream-4-5-251128'] },
+    gemini: { label: 'Gemini Recommended', baseUrl: 'https://api.chatfire.site', models: ['gemini-3-pro-image-preview'] },
+    volcengine: { label: 'Volcengine Recommended', baseUrl: 'https://ark.cn-beijing.volces.com', models: ['doubao-seedream-4-0-250828'] },
   },
   video: {
-    volcengine: { label: '火宝视频', baseUrl: 'https://api.chatfire.site/volcengine', models: ['doubao-seedance-1-5-pro-251215'] },
-    vidu: { label: 'Vidu 推荐', baseUrl: 'https://api.vidu.com', models: ['viduq3-turbo'] },
-    ali: { label: '阿里推荐', baseUrl: 'https://dashscope.aliyuncs.com', models: ['wan2.6-i2v-flash'] },
+    volcengine: { label: 'Huobao Video', baseUrl: 'https://api.chatfire.site/volcengine', models: ['doubao-seedance-1-5-pro-251215'] },
+    vidu: { label: 'Vidu Recommended', baseUrl: 'https://api.vidu.com', models: ['viduq3-turbo'] },
+    ali: { label: 'Aliyun Recommended', baseUrl: 'https://dashscope.aliyuncs.com', models: ['wan2.6-i2v-flash'] },
   },
   audio: {
-    minimax: { label: '火宝音频', baseUrl: 'https://api.chatfire.site/minimax', models: ['speech-2.8-hd'] },
+    minimax: { label: 'Huobao Audio', baseUrl: 'https://api.chatfire.site/minimax', models: ['speech-2.8-hd'] },
   },
 }
 const huobaoPresetCards = [
-  { serviceType: 'text', label: '文本', provider: 'chatfire', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-preview', priority: 100 },
-  { serviceType: 'image', label: '图片', provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
-  { serviceType: 'video', label: '视频', provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
-  { serviceType: 'audio', label: '音频', provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
+  { serviceType: 'text', label: 'Text', provider: 'chatfire', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-preview', priority: 100 },
+  { serviceType: 'image', label: 'Image', provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
+  { serviceType: 'video', label: 'Video', provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
+  { serviceType: 'audio', label: 'Audio', provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
 ]
 const endpointPrefixes = {
   chatfire: '/v1',
@@ -470,7 +470,7 @@ const endpointHint = computed(() => {
   const provider = cfgForm.provider
   const base = cfgForm.base_url || 'https://...'
   const prefix = endpointPrefixes[provider] || ''
-  if (!provider) return '选择服务商后显示推荐端点前缀'
+  if (!provider) return 'Recommended endpoint prefix shows after picking a provider'
   return `${base}${prefix}`
 })
 
@@ -492,7 +492,7 @@ function applyProviderPreset(type, provider) {
 
 async function loadCfgs() { try { cfgs.value = await aiConfigAPI.list() } catch (e) { toast.error(e.message) } }
 async function toggleCfg(c) { await aiConfigAPI.update(c.id, { is_active: !c.is_active }); loadCfgs() }
-async function delCfg(id) { await aiConfigAPI.del(id); toast.success('已删除'); loadCfgs() }
+async function delCfg(id) { await aiConfigAPI.del(id); toast.success('Deleted'); loadCfgs() }
 function startAddCfg(t) {
   cfgEditId.value = null
   cfgTestResult.value = null
@@ -519,8 +519,8 @@ async function testCfgPayload(payload) {
   cfgTesting.value = true
   try {
     cfgTestResult.value = await aiConfigAPI.test(payload)
-    if (cfgTestResult.value.reachable) toast.success('端点已响应')
-    else toast.warning('端点未通过测试')
+    if (cfgTestResult.value.reachable) toast.success('Endpoint responded')
+    else toast.warning('Endpoint test failed')
   } catch (e) {
     toast.error(e.message)
   } finally {
@@ -547,17 +547,17 @@ async function testExistingCfg(c) {
   })
 }
 async function saveCfg() {
-  if (!cfgForm.provider) { toast.warning('选择服务商'); return }
+  if (!cfgForm.provider) { toast.warning('Select a provider'); return }
   const models = cfgForm.modelStr.split(',').map(s => s.trim()).filter(Boolean)
   try {
     if (cfgEditId.value) await aiConfigAPI.update(cfgEditId.value, { name: cfgForm.name, provider: cfgForm.provider, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority })
     else await aiConfigAPI.create({ service_type: cfgForm.service_type, provider: cfgForm.provider, name: cfgForm.name || `${cfgForm.provider}-${cfgForm.service_type}`, api_key: cfgForm.api_key, base_url: cfgForm.base_url, model: models, priority: cfgForm.priority })
-    cfgDialog.value = false; toast.success('已保存'); loadCfgs()
+    cfgDialog.value = false; toast.success('Saved'); loadCfgs()
   } catch (e) { toast.error(e.message) }
 }
 async function applyHuobaoPreset() {
   if (!huobaoForm.apiKey) {
-    toast.warning('请填写 Huobao API Key')
+    toast.warning('Please enter the Huobao API Key')
     return
   }
   try {
@@ -565,7 +565,7 @@ async function applyHuobaoPreset() {
     await loadCfgs()
     await loadAgents()
     presetDialog.value = false
-    toast.success('火宝推荐配置与默认 Agent LLM 已写入')
+    toast.success('Huobao recommended configs and default Agent LLM saved')
   } catch (e) {
     toast.error(e.message)
   }
@@ -579,99 +579,99 @@ const agentSaved = ref(null)
 const agentForm = reactive({ model: '', temperature: 0.7, max_tokens: 4096, system_prompt: '' })
 
 const agentDefs = [
-  { type: 'script_rewriter', label: '剧本改写', icon: '📝' },
-  { type: 'extractor', label: '角色场景提取', icon: '🔍' },
-  { type: 'storyboard_breaker', label: '分镜拆解', icon: '🎬' },
-  { type: 'voice_assigner', label: '音色分配', icon: '🎙' },
-  { type: 'grid_prompt_generator', label: '图片提示词生成', icon: '🖼' },
+  { type: 'script_rewriter', label: 'Script Rewriter', icon: '📝' },
+  { type: 'extractor', label: 'Character & Scene Extractor', icon: '🔍' },
+  { type: 'storyboard_breaker', label: 'Storyboard Breaker', icon: '🎬' },
+  { type: 'voice_assigner', label: 'Voice Assigner', icon: '🎙' },
+  { type: 'grid_prompt_generator', label: 'Image Prompt Generator', icon: '🖼' },
 ]
 
 const defaultPrompts = {
-  script_rewriter: `你是专业编剧，擅长将小说改编为短剧剧本。
+  script_rewriter: `You are a professional screenwriter, skilled at adapting novels into short-drama scripts.
 
-工作流程：
-1. 调用 read_episode_script 读取原始内容
-2. 根据读取到的内容，自己进行改写（输出格式化剧本格式）
-3. 调用 save_script 保存改写后的完整剧本
+Workflow:
+1. Call read_episode_script to read the original content
+2. Rewrite the content yourself based on what you read (output the formatted script)
+3. Call save_script to save the complete rewritten script
 
-格式化剧本格式：
-- 场景头：## S编号 | 内景/外景 · 地点 | 时间段
-- 动作描写：自然段落，不包含镜头语言
-- 对白：角色名：（状态/表情）台词内容
-- 每个场景 30-60 秒内容`,
-  extractor: `你是制片助理，擅长从剧本中提取角色和场景信息，并在提取时与项目已有数据进行智能去重。
+Formatted script specification:
+- Scene header: ## S<number> | Interior/Exterior · Location | Time of day
+- Action: natural paragraphs, no camera language
+- Dialogue: Character name: (state/expression) line content
+- Each scene should be 30-60 seconds of content`,
+  extractor: `You are a production assistant, skilled at extracting character and scene information from scripts and intelligently deduplicating against the project's existing data.
 
-工作流程：
-1. 调用 read_script_for_extraction 读取格式化剧本
-2. 调用 read_existing_characters 读取项目中已存在的角色列表（用于去重）
-3. 调用 read_existing_scenes 读取项目中已存在的场景列表（用于去重）
-4. 分析剧本内容，提取所有角色信息
-5. 对每个角色：若同名已存在则合并更新，若不存在则新增
-6. 调用 save_dedup_characters 保存角色（去重合并，自动处理新增和更新）
-7. 分析剧本内容，提取所有场景信息
-8. 对每个场景：若同地点+时间段已存在则复用，若不存在则新增
-9. 调用 save_dedup_scenes 保存场景（去重合并，自动处理新增和复用）
+Workflow:
+1. Call read_script_for_extraction to read the formatted script
+2. Call read_existing_characters to read the project's existing character list (for dedup)
+3. Call read_existing_scenes to read the project's existing scene list (for dedup)
+4. Analyze the script content, extract all character information
+5. For each character: if same-name exists, merge/update; otherwise create new
+6. Call save_dedup_characters to save characters (dedup and merge, auto-handle create/update)
+7. Analyze the script content, extract all scene information
+8. For each scene: if same location+time of day exists, reuse; otherwise create new
+9. Call save_dedup_scenes to save scenes (dedup and merge, auto-handle create/reuse)
 
-去重规则：
-- 角色：按名字精确匹配，同名保留现有（合并信息）
-- 场景：按【地点+时间段】精确匹配；同地点不同时段视为新场景
+Dedup rules:
+- Characters: exact match by name; same name keeps existing (merge info)
+- Scenes: exact match by [location + time of day]; same location with different time of day is a new scene
 
-提取要求：
-- 角色要包含完整的外貌特征描述（发型、服装、体态等）
-- 场景要包含光线、色调、氛围等视觉信息
-- 不要遗漏任何有台词或重要动作的角色`,
-  storyboard_breaker: `你是资深影视分镜师，擅长将剧本拆解为分镜方案。
+Extraction requirements:
+- Characters must include complete appearance descriptions (hairstyle, clothing, build, etc.)
+- Scenes must include lighting, color tone, atmosphere, and other visual information
+- Do not miss any character who has dialogue or important action`,
+  storyboard_breaker: `You are a senior storyboard artist, skilled at breaking scripts into storyboard plans.
 
-工作流程：
-1. 调用 read_storyboard_context 读取剧本、角色列表、场景列表
-2. 将剧本拆解为镜头序列（每个镜头 10-15 秒）
-3. 为每个镜头生成视频提示词（video_prompt）
-4. 调用 save_storyboards 保存所有分镜`,
-  voice_assigner: `你是配音导演，擅长为角色选择合适的音色。
+Workflow:
+1. Call read_storyboard_context to read the script, character list, and scene list
+2. Break the script into a shot sequence (each shot 10-15 seconds)
+3. Generate a video prompt (video_prompt) for each shot
+4. Call save_storyboards to save all storyboards`,
+  voice_assigner: `You are a casting director, skilled at selecting appropriate voices for characters.
 
-工作流程：
-1. 调用 list_voices 获取可用音色列表
-2. 调用 get_characters 获取所有角色信息
-3. 根据每个角色的性别、性格、年龄、角色定位，选择最匹配的音色
-4. 对每个角色调用 assign_voice 分配音色，并说明选择理由
+Workflow:
+1. Call list_voices to get the available voice list
+2. Call get_characters to get all character information
+3. For each character, select the most matching voice based on gender, personality, age, and role
+4. Call assign_voice for each character to assign a voice, and explain the selection rationale
 
-注意：每个角色都必须分配音色，不要遗漏。`,
-  grid_prompt_generator: `你是专业的 AI 图像提示词工程师，擅长为角色、场景和宫格图生成高质量的英文提示词。
+Note: Every character must be assigned a voice. Do not miss any.`,
+  grid_prompt_generator: `You are a professional AI image prompt engineer, skilled at generating high-quality English prompts for characters, scenes, and grid images.
 
-你将收到用户的请求，告知要生成哪种类型的提示词：
-- "角色" → 生成角色图片提示词
-- "场景" → 生成场景图片提示词
-- "宫格" → 生成宫格图提示词
+You will receive the user's request telling you which type of prompt to generate:
+- "character" -> generate a character image prompt
+- "scene" -> generate a scene image prompt
+- "grid" -> generate a grid image prompt
 
-## 角色图片提示词
+## Character image prompt
 
-工作流程：
-1. 调用 read_characters 读取所有角色信息
-2. 根据角色外貌特征（appearance）、性格（personality）、定位（role）生成英文提示词
-3. 提示词结构：[外貌描述]，[性格/气质]，[角色定位]，[电影感]，[高质量]，[无文字水印]
+Workflow:
+1. Call read_characters to read all character information
+2. Generate an English prompt based on the character's appearance, personality, and role
+3. Prompt structure: [appearance], [personality/temperament], [role], [cinematic feel], [high quality], [no text or watermarks]
 
-## 场景图片提示词
+## Scene image prompt
 
-工作流程：
-1. 调用 read_scenes 读取所有场景信息
-2. 根据场景地点（location）、时间段（time）、已有描述（prompt）生成英文提示词
-3. 提示词结构：[地点]，[时间/光线/氛围]，[已有描述]，[电影感场景]，[高质量]，[无文字水印]
+Workflow:
+1. Call read_scenes to read all scene information
+2. Generate an English prompt based on the scene's location, time of day, and existing description
+3. Prompt structure: [location], [time/lighting/atmosphere], [existing description], [cinematic scene], [high quality], [no text or watermarks]
 
-## 宫格图提示词（参考 skills/grid-image-generator/SKILL.md）
+## Grid image prompt (see skills/grid-image-generator/SKILL.md)
 
-工作流程：
-1. 调用 read_shots_for_grid 读取选中镜头的详细信息
-2. 根据 mode 调用 generate_grid_prompt：
-   - first_frame 模式：每格=一个镜头的首帧，NxN 风格统一
-   - first_last 模式：每个镜头占2格（左首右尾），同一行风格连续
-   - multi_ref 模式：所有格子都是同一镜头的不同参考角度
-3. 返回 grid_prompt（整体提示词）和 cell_prompts（每格提示词）
+Workflow:
+1. Call read_shots_for_grid to read the selected shots' detailed information
+2. Call generate_grid_prompt based on mode:
+   - first_frame mode: one cell per shot's first frame, NxN unified style
+   - first_last mode: each shot takes 2 cells (left first / right last), same row continuous style
+   - multi_ref mode: all cells are different reference angles of the same shot
+3. Return grid_prompt (overall prompt) and cell_prompts (per-cell prompt)
 
-提示词规范：
-- 使用英文提示词
-- 必须包含 "consistent art style" 保持风格统一
-- 必须包含 "cinematic quality"
-- 避免出现文字或水印`,
+Prompt specification:
+- Use English prompts
+- Must include "consistent art style" to keep style unified
+- Must include "cinematic quality"
+- Avoid text or watermarks`,
 }
 
 function getAgentCfg(type) {
@@ -713,7 +713,7 @@ function toggleAgentEdit(type) {
 
 function resetAgentPrompt(type) {
   agentForm.system_prompt = defaultPrompts[type] || ''
-  toast.info('已恢复默认提示词，点击保存生效')
+  toast.info('Default prompt restored. Click Save to apply.')
 }
 
 async function saveAgentCfg(type) {
@@ -736,7 +736,7 @@ async function saveAgentCfg(type) {
     }
     await loadAgents()
     agentSaved.value = type
-    toast.success(`${agentDefs.find(a => a.type === type)?.label} 配置已保存`)
+    toast.success(`${agentDefs.find(a => a.type === type)?.label} configuration saved`)
     setTimeout(() => { if (agentSaved.value === type) agentSaved.value = null }, 3000)
   } catch (e) {
     toast.error(e.message)
@@ -791,19 +791,19 @@ async function confirmAddSkill() {
     await skillsAPI.create({ id: skillId, name: newSkillForm.name, description: newSkillForm.description })
     addSkillDialog.value = false
     await loadAllSkills()
-    toast.success('Skill 创建成功')
+    toast.success('Skill created')
   } catch (e) {
     toast.error(e.message)
   }
 }
 
 async function deleteSkill(id) {
-  if (!confirm(`确定删除 Skill「${id}」？`)) return
+  if (!confirm(`Are you sure you want to delete Skill "${id}"?`)) return
   try {
     await skillsAPI.del(id)
     if (editingSkill.value === id) editingSkill.value = null
     await loadAllSkills()
-    toast.success('已删除')
+    toast.success('Deleted')
   } catch (e) {
     toast.error(e.message)
   }
@@ -826,7 +826,7 @@ async function saveSkill(id) {
     await skillsAPI.update(id, skillContent.value)
     await loadAllSkills()
     skillSaved.value = id
-    toast.success(`已保存`)
+    toast.success('Saved')
     setTimeout(() => { if (skillSaved.value === id) skillSaved.value = null }, 3000)
   } catch (e) {
     toast.error(e.message)
@@ -1045,7 +1045,7 @@ onMounted(() => { loadCfgs(); loadAgents(); loadAllSkills() })
 .agent-card-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px; }
 .agent-card-foot { display: flex; align-items: center; gap: 8px; padding-top: 8px; }
 
-/* Skills 布局 */
+/* Skills layout */
 .skills-layout { display: flex; height: 100%; overflow: hidden; }
 .skills-agent-list {
   width: 200px; flex-shrink: 0; border-right: 1px solid var(--border);

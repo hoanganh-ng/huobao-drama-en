@@ -9,18 +9,18 @@ import { redactUrl, logTaskError, logTaskProgress, logTaskSuccess } from '../uti
 const app = new Hono()
 
 const HUOBAO_PRESET_SERVICES = [
-  { serviceType: 'text', label: '文本', provider: 'chatfire', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-preview', priority: 100 },
-  { serviceType: 'image', label: '图片', provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
-  { serviceType: 'video', label: '视频', provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
-  { serviceType: 'audio', label: '音频', provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
+  { serviceType: 'text', label: 'Text', provider: 'chatfire', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-preview', priority: 100 },
+  { serviceType: 'image', label: 'Image', provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
+  { serviceType: 'video', label: 'Video', provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
+  { serviceType: 'audio', label: 'Audio', provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
 ] as const
 
 const HUOBAO_AGENT_DEFAULTS = [
-  { agentType: 'script_rewriter', name: '剧本改写' },
-  { agentType: 'extractor', name: '角色场景提取' },
-  { agentType: 'storyboard_breaker', name: '分镜拆解' },
-  { agentType: 'voice_assigner', name: '音色分配' },
-  { agentType: 'grid_prompt_generator', name: '图片提示词生成' },
+  { agentType: 'script_rewriter', name: 'Script Rewriter' },
+  { agentType: 'extractor', name: 'Character & Scene Extractor' },
+  { agentType: 'storyboard_breaker', name: 'Storyboard Breaker' },
+  { agentType: 'voice_assigner', name: 'Voice Assigner' },
+  { agentType: 'grid_prompt_generator', name: 'Image Prompt Generator' },
 ] as const
 
 const HUOBAO_AGENT_MODEL = 'gemini-3-pro-preview'
@@ -140,7 +140,7 @@ app.post('/', async (c) => {
   const body = await c.req.json()
   const ts = now()
 
-  // 验证必填字段
+  // Validate required fields
   if (!body.service_type || !body.provider) {
     return badRequest(c, 'service_type and provider are required')
   }
@@ -182,7 +182,7 @@ app.post('/huobao-preset', async (c) => {
     const values = {
       serviceType: preset.serviceType,
       provider: preset.provider,
-      name: `火宝默认${preset.label}服务`,
+      name: `Huobao Default ${preset.label} Service`,
       baseUrl: preset.baseUrl,
       apiKey,
       model: JSON.stringify([preset.model]),
@@ -281,8 +281,8 @@ app.post('/test', async (c) => {
       method: probe.method,
       url: probeUrl,
       message: reachable
-        ? (resp.ok ? '端点可访问，认证与路径基本正常' : '端点已响应，请根据状态码判断认证或路径是否正确')
-        : '端点未按预期响应，请检查 Base URL 和代理前缀',
+        ? (resp.ok ? 'Endpoint reachable; auth and path look good' : 'Endpoint responded. Check the status code to verify auth and path.')
+        : 'Endpoint did not respond as expected. Check the Base URL and proxy prefix.',
       response_preview: text.slice(0, 240),
     }
     if (reachable) {
@@ -310,7 +310,7 @@ app.post('/test', async (c) => {
       reachable: false,
       method: probe.method,
       url: probeUrl,
-      message: error.message || '请求失败',
+      message: error.message || 'Request failed',
       response_preview: '',
     })
   }

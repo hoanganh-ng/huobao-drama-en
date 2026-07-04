@@ -1,5 +1,5 @@
 /**
- * FFmpeg 多镜头拼接 — 将所有合成后的镜头视频拼接为一集
+ * FFmpeg multi-storyboard merge — concatenate all composed storyboard videos into one episode
  */
 import ffmpeg from 'fluent-ffmpeg'
 import fs from 'fs'
@@ -22,7 +22,7 @@ function toAbsPath(relativePath: string): string {
 }
 
 /**
- * 拼接一集的所有合成镜头视频
+ * Merge all composed storyboard videos of one episode
  */
 export async function mergeEpisodeVideos(episodeId: number, dramaId: number): Promise<number> {
   const storyboards = db.select().from(schema.storyboards)
@@ -42,7 +42,7 @@ export async function mergeEpisodeVideos(episodeId: number, dramaId: number): Pr
 
   logTaskStart('MergeTask', 'episode-merge', { episodeId, dramaId, clips: videos.length })
 
-  // 创建 merge 记录
+  // Create merge record
   const ts = now()
   const res = db.insert(schema.videoMerges).values({
     episodeId,
@@ -56,7 +56,7 @@ export async function mergeEpisodeVideos(episodeId: number, dramaId: number): Pr
   }).run()
   const mergeId = Number(res.lastInsertRowid)
 
-  // 异步执行
+  // Async execution
   doMerge(mergeId, episodeId, videos).catch(err => {
     logTaskError('MergeTask', 'episode-merge', { mergeId, episodeId, error: err.message })
     console.error(`[Merge] Failed:`, err)
@@ -69,7 +69,7 @@ export async function mergeEpisodeVideos(episodeId: number, dramaId: number): Pr
 }
 
 async function doMerge(mergeId: number, episodeId: number, videos: string[]) {
-  // 生成 concat 列表文件
+  // Generate concat list file
   const listDir = path.join(STORAGE_ROOT, 'temp')
   fs.mkdirSync(listDir, { recursive: true })
   const listPath = path.join(listDir, `${uuid()}.txt`)
@@ -79,7 +79,7 @@ async function doMerge(mergeId: number, episodeId: number, videos: string[]) {
     .join('\n')
   fs.writeFileSync(listPath, listContent, 'utf-8')
 
-  // 输出文件
+  // Output file
   const outputDir = path.join(STORAGE_ROOT, 'merged')
   fs.mkdirSync(outputDir, { recursive: true })
   const outputFilename = `${uuid()}.mp4`
@@ -105,20 +105,20 @@ async function doMerge(mergeId: number, episodeId: number, videos: string[]) {
       .run()
   })
 
-  // 清理临时文件
+  // Clean up temp files
   fs.unlinkSync(listPath)
 
-  // 获取时长
+  // Get duration
   const duration = await getVideoDuration(outputPath)
 
   const mergedRelative = `static/merged/${outputFilename}`
 
-  // 更新 merge 记录
+  // Update merge record
   db.update(schema.videoMerges)
     .set({ status: 'completed', mergedUrl: mergedRelative, duration, completedAt: now() })
     .where(eq(schema.videoMerges.id, mergeId)).run()
 
-  // 更新 episode
+  // Update episode
   db.update(schema.episodes)
     .set({ videoUrl: mergedRelative, updatedAt: now() })
     .where(eq(schema.episodes.id, episodeId)).run()

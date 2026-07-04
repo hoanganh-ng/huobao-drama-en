@@ -1,108 +1,108 @@
 ---
 name: grid-image-generator
-description: 图片提示词生成指南 — 角色、场景、宫格图三类提示词规范
+description: Image prompt generation guide — specification for character, scene, and grid image prompts
 ---
 
-# 图片提示词生成指南
+# Image Prompt Generation Guide
 
-本 SKILL 对应 `grid_prompt_generator` Agent，支持生成三类图片提示词：
+This SKILL corresponds to the `grid_prompt_generator` Agent. Supports three categories of image prompts:
 
-1. **角色图片提示词** — 角色外貌与气质
-2. **场景图片提示词** — 场景氛围与光线
-3. **宫格图提示词** — 多镜头网格拼图
+1. **Character image prompt** — character appearance and temperament
+2. **Scene image prompt** — scene atmosphere and lighting
+3. **Grid image prompt** — multi-shot grid mosaic
 
-详细模板见 `reference/` 目录。
+See the `reference/` directory for detailed templates.
 
 ---
 
-## 角色图片提示词
+## Character image prompt
 
-参考：`reference/character-prompt.md`
+Reference: `reference/character-prompt.md`
 
-### 模板结构
+### Template structure
 ```
 [appearance], [personality/temperament], [role], [cinematic portrait], [high quality], [consistent art style], [no text, no watermark]
 ```
 
-### 生成规则
-- 以 `appearance`（外貌描述）为核心
-- `personality` 决定气质基调（内敛/张扬/神秘等）
-- `role` 决定服装和道具风格
-- 必须包含 `cinematic portrait` + `consistent art style`
-- 避免出现文字、签名、水印
+### Generation rules
+- Center on `appearance` (physical description)
+- `personality` determines the overall temperament (reserved / bold / mysterious, etc.)
+- `role` determines the clothing and prop style
+- Must include `cinematic portrait` + `consistent art style`
+- Avoid text, signatures, watermarks
 
 ---
 
-## 场景图片提示词
+## Scene image prompt
 
-参考：`reference/scene-prompt.md`
+Reference: `reference/scene-prompt.md`
 
-### 模板结构
+### Template structure
 ```
 [location], [time period], [lighting atmosphere], [scene description], [cinematic scene], [high quality], [consistent art style], [no text, no watermark]
 ```
 
-### 生成规则
-- 以 `location`（地点）为基础
-- `time` 决定光线色调（白天/夜晚/黄昏）
-- 场景氛围词：atmospheric, moody, warm, cold 等
-- 必须包含 `cinematic scene` + `consistent art style`
-- 避免出现文字、签名、水印
+### Generation rules
+- Base on `location`
+- `time` determines the lighting tone (day / night / dusk)
+- Atmosphere words: atmospheric, moody, warm, cold, etc.
+- Must include `cinematic scene` + `consistent art style`
+- Avoid text, signatures, watermarks
 
 ---
 
-## 宫格图提示词
+## Grid image prompt
 
-参考：`reference/shot-prompt.md`
+Reference: `reference/shot-prompt.md`
 
-### 三种模式
+### Three modes
 
-#### 首帧模式 (first_frame)
-每个格子 = 一个镜头的起始画面，但必须严格生成用户指定的 `rows x cols` 总格数。
+#### First-frame mode (first_frame)
+Each cell = the opening frame of one shot, but you must strictly generate the user-specified `rows x cols` total cells.
 
 ```
 [rows x cols grid layout], exactly [rows*cols] visible panels, consistent art style, [style description],
-格1: [shot 1 opening scene],
-格2: [shot 2 opening scene],
-格3: [shot 3 opening scene],
+cell 1: [shot 1 opening scene],
+cell 2: [shot 2 opening scene],
+cell 3: [shot 3 opening scene],
 ...
-格N: [opening scene],
+cell N: [opening scene],
 high quality, cinematic lighting, no merged panels, no missing panels, no text, no watermark
 ```
 
-#### 首尾帧模式 (first_last)
-保持首尾帧节奏感，但仍然必须严格生成用户指定的 `rows x cols` 总格数，不允许偷偷改成 `Nx2`。
+#### First/last-frame mode (first_last)
+Keep the first/last frame rhythm, but you must still strictly generate the user-specified `rows x cols` total cells. You may NOT silently change it to `Nx2`.
 
 ```
 [rows x cols grid layout], exactly [rows*cols] visible panels, consistent art style, [style description],
-格1: [opening beat],
-格2: [closing beat],
-格3: [opening beat],
-格4: [closing beat],
+cell 1: [opening beat],
+cell 2: [closing beat],
+cell 3: [opening beat],
+cell 4: [closing beat],
 ...
 high quality, cinematic, continuous motion implied, no merged panels, no missing panels, no text
 ```
 
-#### 多参考模式 (multi_ref)
-所有格子都是同一镜头的不同角度/构图参考，但仍然必须严格生成用户指定的 `rows x cols` 总格数。
+#### Multi-reference mode (multi_ref)
+All cells are different angles / compositions of the same shot, but you must still strictly generate the user-specified `rows x cols` total cells.
 
 ```
 [rows x cols grid layout], exactly [rows*cols] visible panels, same scene different angles, [style description],
 [main scene description],
-格1: wide shot establishing,
-格2: medium shot character focus,
-格3: close-up detail,
-格4: dramatic angle,
+cell 1: wide shot establishing,
+cell 2: medium shot character focus,
+cell 3: close-up detail,
+cell 4: dramatic angle,
 ...
 consistent lighting and color palette, no merged panels, no missing panels, no text
 ```
 
-### 通用规则
-1. 提示词使用**英文**
-2. 必须明确写出用户指定的 `rows x cols grid layout`
-3. 必须包含 `consistent art style` 保持风格统一
-4. 必须明确要求 `exactly N visible panels`
-5. 必须明确要求 `no merged panels, no missing panels`
-6. 避免在格子间出现分割线的描述
-7. 尺寸建议：每格 960x540，总图 = 960×cols × 540×rows
-8. 当存在参考图映射时，统一使用 `图片1/图片2/...` 指代参考图，不要把它和 `格1/格2/...` 混用
+### General rules
+1. Prompts are in **English**
+2. Must explicitly write the user-specified `rows x cols grid layout`
+3. Must include `consistent art style` to keep style unified
+4. Must explicitly require `exactly N visible panels`
+5. Must explicitly require `no merged panels, no missing panels`
+6. Avoid describing dividers between cells
+7. Recommended size: 960x540 per cell, full image = 960*cols × 540*rows
+8. When reference images exist, uniformly use `image 1 / image 2 / ...` for reference images, and do not mix this with `cell 1 / cell 2 / ...`

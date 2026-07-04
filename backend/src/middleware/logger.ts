@@ -18,18 +18,18 @@ function statusColor(status: number): string {
 }
 
 function formatTime(): string {
-  return new Date().toLocaleTimeString('zh-CN', { hour12: false })
+  return new Date().toLocaleTimeString('en-US', { hour12: false })
 }
 
 /**
- * 全局日志中间件 — 打印请求方法/路径/状态/耗时/请求体
+ * Global request logger — prints method/path/status/elapsed/body
  */
 export const requestLogger: MiddlewareHandler = async (c, next) => {
   const method = c.req.method
   const path = c.req.path
   const start = performance.now()
 
-  // 打印请求
+  // Log request
   const time = formatTime()
   let bodyInfo = ''
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
@@ -54,7 +54,7 @@ export const requestLogger: MiddlewareHandler = async (c, next) => {
 }
 
 /**
- * 全局错误处理 — 捕获未处理异常，打印完整堆栈
+ * Global error handler — catches unhandled exceptions and prints the full stack
  */
 export const errorHandler: MiddlewareHandler = async (c, next) => {
   try {

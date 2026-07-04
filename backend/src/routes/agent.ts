@@ -1,5 +1,5 @@
 /**
- * Agent 聊天路由 — 非流式版本
+ * Agent chat route — non-streaming version
  */
 import { Hono } from 'hono'
 import { createAgent, validAgentTypes } from '../agents/index.js'
@@ -22,7 +22,7 @@ function normalizeToolResult(entry: any) {
   return typeof result === 'string' ? result : JSON.stringify(result)
 }
 
-// POST /agent/:type/chat — 非流式 Agent 对话
+// POST /agent/:type/chat — non-streaming Agent chat
 app.post('/:type/chat', async (c) => {
   const agentType = c.req.param('type')
   if (!validAgentTypes.includes(agentType)) {
@@ -61,7 +61,7 @@ app.post('/:type/chat', async (c) => {
     const elapsed = ((performance.now() - startTime) / 1000).toFixed(1)
     logTaskSuccess('Agent', agentType, { elapsedSeconds: elapsed })
 
-    // 收集所有 tool calls 和 results
+    // Collect all tool calls and results
     const toolCalls = result.toolCalls || []
     const toolResults = result.toolResults || []
     const normalizedToolCalls = toolCalls.map((tc: any) => ({

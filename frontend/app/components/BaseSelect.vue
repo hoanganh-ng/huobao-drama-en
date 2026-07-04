@@ -16,7 +16,7 @@
             ref="searchInputEl"
             v-model="searchQuery"
             class="base-select-search-input"
-            placeholder="搜索..."
+            placeholder="Search..."
             @keydown="onSearchKeydown"
           />
         </div>
@@ -36,7 +36,7 @@
               >{{ opt.label }}</button>
             </template>
           </template>
-          <div v-else class="base-select-empty">无匹配结果</div>
+          <div v-else class="base-select-empty">No matching results</div>
         </div>
       </div>
     </Teleport>
@@ -55,7 +55,7 @@ import { ChevronDown, Search } from 'lucide-vue-next'
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
   options: { type: Array, default: () => [] }, // [{ label, value, group? }, ...] or [{ label, group, options: [] }]
-  placeholder: { type: String, default: '请选择...' },
+  placeholder: { type: String, default: 'Select...' },
   searchable: { type: Boolean, default: true },
 })
 const emit = defineEmits(['update:modelValue'])

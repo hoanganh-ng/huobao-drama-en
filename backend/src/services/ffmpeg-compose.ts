@@ -1,5 +1,5 @@
 /**
- * FFmpeg 单镜头合成 — 视频 + TTS音频 + 烧录字幕
+ * FFmpeg single-shot composition — video + TTS audio + burnt-in subtitles
  */
 import ffmpeg from 'fluent-ffmpeg'
 import fs from 'fs'
@@ -17,8 +17,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const STORAGE_ROOT = process.env.STORAGE_PATH || path.resolve(__dirname, '../../../data/static')
 const DATA_ROOT = path.resolve(__dirname, '../../../data')
 let subtitleFilterSupport: boolean | null = null
-const IGNORE_TTS_SPEAKERS = /^(环境音|环境声|音效|效果音|sfx|sound ?effect|bgm|背景音|背景音乐|ambient)$/i
-const IGNORE_TTS_TEXT = /^(无|无对白|无台词|无旁白|无需配音|无需对白|none|null|n\/a|na|环境音|环境声|音效|效果音|纯音效|纯环境音|只有环境音|仅环境音|背景音|背景音乐|bgm|sfx|ambient)$/i
+const IGNORE_TTS_SPEAKERS = /^(sfx|sound ?effect|bgm|ambient)$/i
+const IGNORE_TTS_TEXT = /^(none|null|n\/a|na|sfx|bgm|ambient)$/i
 
 function toAbsPath(relativePath: string): string {
   if (path.isAbsolute(relativePath)) return relativePath
@@ -48,7 +48,7 @@ function parseDialogueForTTS(dialogue?: string | null) {
 }
 
 /**
- * 合成单个镜头：视频 + TTS对白音频 + 烧录字幕
+ * Compose a single shot: video + TTS dialogue audio + burnt-in subtitles
  */
 export async function composeStoryboard(storyboardId: number): Promise<string> {
   const [sb] = db.select().from(schema.storyboards).where(eq(schema.storyboards.id, storyboardId)).all()
@@ -70,7 +70,7 @@ export async function composeStoryboard(storyboardId: number): Promise<string> {
   let subtitlePath: string | null = null
   const parsedDialogue = parseDialogueForTTS(sb.dialogue)
 
-  // 1. 生成 TTS 音频（如果有对白）
+  // 1. Generate TTS audio (if dialogue exists)
   try {
     if (!parsedDialogue.ignorable) {
       if (sb.ttsAudioUrl) {
@@ -104,7 +104,7 @@ export async function composeStoryboard(storyboardId: number): Promise<string> {
       }
     }
 
-    // 2. 生成字幕文件（SRT）
+    // 2. Generate subtitle file (SRT)
     if (!parsedDialogue.ignorable) {
       const srtDir = path.join(STORAGE_ROOT, 'subtitles')
       fs.mkdirSync(srtDir, { recursive: true })
@@ -121,7 +121,7 @@ export async function composeStoryboard(storyboardId: number): Promise<string> {
         .where(eq(schema.storyboards.id, storyboardId)).run()
     }
 
-    // 3. FFmpeg 合成
+    // 3. FFmpeg composition
     const outputDir = path.join(STORAGE_ROOT, 'composed')
     fs.mkdirSync(outputDir, { recursive: true })
     const outputFilename = `${uuid()}.mp4`

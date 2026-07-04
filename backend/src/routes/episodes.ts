@@ -24,7 +24,7 @@ app.post('/', async (c) => {
   const res = db.insert(schema.episodes).values({
     dramaId: body.drama_id,
     episodeNumber: nextNum,
-    title: body.title || `第${nextNum}集`,
+    title: body.title || `Episode ${nextNum}`,
     imageConfigId: body.image_config_id,
     videoConfigId: body.video_config_id,
     audioConfigId: body.audio_config_id,
@@ -122,7 +122,7 @@ app.get('/:episode_id/storyboards', async (c) => {
   })))
 })
 
-// GET /episodes/:id/pipeline-status — 流水线进度
+// GET /episodes/:id/pipeline-status — pipeline progress
 app.get('/:id/pipeline-status', async (c) => {
   const episodeId = Number(c.req.param('id'))
   const [ep] = db.select().from(schema.episodes).where(eq(schema.episodes.id, episodeId)).all()

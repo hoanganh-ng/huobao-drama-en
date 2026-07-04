@@ -91,7 +91,7 @@ async function processVideoGeneration(id: number, config: AIConfig) {
     const resolvedLastFrameUrl = await normalizeVideoReferenceUrl(record.lastFrameUrl)
     const resolvedReferenceImageUrls = await normalizeVideoReferenceUrls(record.referenceImageUrls)
 
-    // 使用 Adapter 构建请求
+    // Build request via Adapter
     const { url, method, headers, body } = adapter.buildGenerateRequest(config, {
       id: record.id,
       model: record.model,
@@ -133,19 +133,19 @@ async function processVideoGeneration(id: number, config: AIConfig) {
 
     if (!isAsync && videoUrl) {
       logTaskProgress('VideoTask', 'sync-complete', { id, videoUrl })
-      // 同步模式
+      // Sync mode
       await handleVideoComplete(id, videoUrl, record.duration)
       return
     }
 
-    // 异步模式：更新 taskId，开始轮询
+    // Async mode: update taskId and start polling
     db.update(schema.videoGenerations)
       .set({ taskId, status: 'processing', updatedAt: now() })
       .where(eq(schema.videoGenerations.id, id))
       .run()
     logTaskProgress('VideoTask', 'poll-start', { id, taskId, provider: config.provider })
 
-    // Vidu 没有轮询端点，跳过轮询（依赖 Webhook 回调）
+    // Vidu has no polling endpoint, skip polling (relies on webhook callback)
     if (adapter.provider === 'vidu') {
       logTaskProgress('VideoTask', 'webhook-wait', { id, taskId, provider: adapter.provider })
       return

@@ -1,76 +1,76 @@
 ---
 name: storyboard-breaker
-description: 分镜拆解专业规范
+description: Storyboard breaking — professional conventions for breaking scripts into shots
 ---
 
-# 分镜拆解指南
+# Storyboard Breaker Guide
 
-## 拆解原则
+## Breaking principles
 
-每个镜头聚焦**单一动作**，描述要详尽具体。每个镜头时长 10-15 秒。
+Each shot focuses on a **single action**; descriptions must be detailed and specific. Each shot is 10-15 seconds.
 
-## 镜头要素
+## Shot elements
 
-1. **镜头标题**：3-5字概括核心内容（如"噩梦惊醒"）
-2. **时间**：具体时分 + 光线描述
-3. **地点**：场景完整描述 + 空间布局 + 环境细节
-4. **景别**：远景/全景/中景/近景/特写
-5. **角度**：平视/仰视/俯视/侧面/背面
-6. **运镜**：固定/推镜/拉镜/摇镜/跟镜/移镜
-7. **动作**：谁 + 具体怎么做 + 肢体细节 + 表情
-8. **对话**：该镜头的完整对话
-9. **画面结果**：动作的即时后果 + 视觉细节
-10. **氛围**：光线 + 色调 + 声音 + 整体氛围
-11. **时长**：每个镜头 10-15 秒
-12. **静态画面提示词**：`image_prompt`，用于首帧/尾帧/镜头图片生成
-13. **视频提示词**：`video_prompt`，按 3 秒分段的视频生成描述（必填）
-14. **配乐提示词**：`bgm_prompt`，描述该镜头适合的配乐风格
-15. **音效提示词**：`sound_effect`，描述该镜头关键环境音/动作音
-16. **场景关联**：若能匹配已有场景，必须填写 `scene_id`
-17. **角色关联**：填写 `character_ids`，绑定当前镜头涉及的 0 到多个角色
+1. **Shot title**: 3-5 character summary of the core content (e.g. "Wakes from a nightmare")
+2. **Time**: specific time of day + lighting description
+3. **Location**: full scene description + spatial layout + environmental details
+4. **Framing**: wide / full / medium / close-up / extreme close-up
+5. **Angle**: eye-level / low / high / side / behind
+6. **Movement**: static / push-in / pull-out / pan / follow / track
+7. **Action**: who + how specifically + body details + expression
+8. **Dialogue**: the full dialogue of this shot
+9. **Result**: the immediate consequence of the action + visual details
+10. **Atmosphere**: lighting + color tone + sound + overall mood
+11. **Duration**: each shot 10-15 seconds
+12. **Image prompt**: `image_prompt`, used for first frame / last frame / shot image generation
+13. **Video prompt**: `video_prompt`, video-generation description in 3-second chunks (required)
+14. **BGM prompt**: `bgm_prompt`, describes the suitable BGM style for this shot
+15. **Sound effect**: `sound_effect`, describes the key environmental / action sound for this shot
+16. **Scene link**: if an existing scene can be matched, `scene_id` must be filled in
+17. **Character link**: fill in `character_ids`, binding 0 to many characters in this shot
 
-## 视频提示词格式
+## Video prompt format
 
-每个镜头必须包含 `video_prompt` 字段，用于驱动 AI 视频生成：
+Each shot must include a `video_prompt` field to drive AI video generation:
 
 ```
-0-3秒：<location>咖啡厅</location>，近景，<role>小明</role>低头看手机，表情焦虑。
-<n>3-6秒：<location>咖啡厅</location>，全景，门铃响，<role>小红</role>推门走入。
-<n>6-9秒：<location>咖啡厅</location>，中景，<role>小红</role>微笑走向小明，坐下。
+0-3s: <location>coffee shop</location>, close-up, <role>Xiaoming</role> looking down at his phone, anxious expression.
+<n>3-6s: <location>coffee shop</location>, wide shot, doorbell rings, <role>Xiaohong</role> pushes the door and walks in.
+<n>6-9s: <location>coffee shop</location>, medium shot, <role>Xiaohong</role> smiles and walks toward Xiaoming, sits down.
 ```
 
-标签说明：
-- `<location>地点</location>` — 场景标记
-- `<role>角色名</role>` — 角色标记
-- `<voice>角色名</voice>` — 画外音/旁白标记
-- `<n>` — 时间段分隔符
+Tag reference:
+- `<location>location</location>` — scene marker
+- `<role>character name</role>` — character marker
+- `<voice>character name</voice>` — voiceover / narration marker
+- `<n>` — time-segment separator
 
-## 使用步骤
+## Usage steps
 
-1. 调用 `read_storyboard_context` 读取剧本、角色、场景、已有分镜摘要
-2. 先基于剧本完成镜头拆解，确保总时长和叙事连续性合理
-3. 为每个镜头补全完整字段：`title / shot_type / angle / movement / location / time / character_ids / action / dialogue / description / result / atmosphere / image_prompt / video_prompt / bgm_prompt / sound_effect / duration / scene_id`
-4. 调用 `save_storyboards` 一次性保存完整分镜
-5. 如需调整，调用 `update_storyboard` 修改具体镜头
+1. Call `read_storyboard_context` to read the script, characters, scenes, and existing storyboard summary
+2. First finish the shot break based on the script; ensure total duration and narrative continuity are reasonable
+3. Fill in complete fields for each shot: `title / shot_type / angle / movement / location / time / character_ids / action / dialogue / description / result / atmosphere / image_prompt / video_prompt / bgm_prompt / sound_effect / duration / scene_id`
+4. Call `save_storyboards` to save the complete storyboards in one pass
+5. If adjustment is needed, call `update_storyboard` to modify a specific shot
 
-## 场景关联规则
+## Scene linking rules
 
-- 优先使用 `read_storyboard_context` 返回的 `scenes`
-- `location + time` 可明确匹配时，必须回填正确 `scene_id`
-- 不要凭空生成不存在的场景 ID
-- 如果剧本内容明显落在已有场景中，不要重复创造新场景描述
+- Prioritize using the `scenes` returned by `read_storyboard_context`
+- When `location + time` is a clear match, the correct `scene_id` must be back-filled
+- Do not invent non-existent scene IDs
+- If the script clearly falls within an existing scene, do not re-create a new scene description
 
-## 角色绑定规则
+## Character binding rules
 
-- `character_ids` 必须从 `read_storyboard_context` 返回的角色列表中选择
-- 一个镜头可以没有角色，也可以绑定多个角色
-- 只要镜头里有明确出场、被看见、发生动作或说话的角色，都应绑定进去
-- 纯环境镜头、空镜头、物件镜头可以传空数组
+- `character_ids` must be selected from the character list returned by `read_storyboard_context`
+- A shot may have no characters, or it may bind multiple characters
+- As long as a character clearly appears, is seen, performs actions, or speaks in the shot, they should be bound
+- Pure environment shots, empty shots, and object-only shots may pass an empty array
 
-## 质量要求
+## Quality requirements
 
-- `description` 要适合人读，`video_prompt` 要适合模型生成，二者不要互相替代
-- `image_prompt` 要突出单帧构图、角色外观、环境和光线
-- `video_prompt` 要突出时间推进、动作变化、镜头语言
-- `bgm_prompt` 和 `sound_effect` 用简洁短语即可，但不能空泛到只有“紧张”“悲伤”
-- 若存在旁白，统一写入 `dialogue`，格式为 `旁白：内容`
+- `description` is for human reading, `video_prompt` is for model generation — do not replace one with the other
+- `image_prompt` should highlight single-frame composition, character appearance, environment, and lighting
+- `video_prompt` should highlight time progression, action changes, and camera language
+- `bgm_prompt` and `sound_effect` can be concise phrases, but not so generic that they only read "tense" or "sad"
+- When narration exists, write it uniformly into `dialogue` in the format `Narrator: content`

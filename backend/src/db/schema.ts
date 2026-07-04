@@ -1,6 +1,6 @@
 /**
- * Drizzle schema — 精确匹配现有 SQLite 数据库列名
- * 从 PRAGMA table_info() 逆向生成
+ * Drizzle schema — exactly matches the existing SQLite database column names
+ * Reverse-generated from PRAGMA table_info()
  */
 import { sqliteTable, text, integer, real, primaryKey } from 'drizzle-orm/sqlite-core'
 
@@ -152,7 +152,7 @@ export const aiServiceConfigs = sqliteTable('ai_service_configs', {
   settings: text('settings'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
-  // 注意: 此表无 deleted_at
+  // Note: this table has no deleted_at column
 })
 
 export const aiServiceProviders = sqliteTable('ai_service_providers', {
@@ -172,9 +172,9 @@ export const aiServiceProviders = sqliteTable('ai_service_providers', {
 export const aiVoices = sqliteTable('ai_voices', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   voiceId: text('voice_id').notNull().unique(),   // MiniMax voice_id
-  voiceName: text('voice_name').notNull(),         // 中文名
-  description: text('description'),                // 描述数组 JSON
-  language: text('language'),                     // 语言标签
+  voiceName: text('voice_name').notNull(),         // Display name
+  description: text('description'),                // Description array (JSON)
+  language: text('language'),                     // Language tag
   provider: text('provider').notNull(),           // minimax
   createdAt: text('created_at').notNull(),
 })

@@ -1,7 +1,7 @@
 /**
- * AI 音色管理
- * GET  /api/v1/ai-voices       - 获取音色列表
- * POST /api/v1/ai-voices/sync  - 从 MiniMax 同步音色
+ * AI voice management
+ * GET  /api/v1/ai-voices       - fetch voice list
+ * POST /api/v1/ai-voices/sync  - sync voices from MiniMax
  */
 import { Hono } from 'hono'
 import { eq } from 'drizzle-orm'
@@ -31,7 +31,7 @@ app.get('/', async (c) => {
 
 // POST /ai-voices/sync
 app.post('/sync', async (c) => {
-  // 从数据库获取 minimax 的音频配置
+  // Fetch minimax audio config from DB
   const rows = db.select().from(schema.aiServiceConfigs)
     .where(eq(schema.aiServiceConfigs.serviceType, 'audio'))
     .all()
@@ -46,7 +46,7 @@ app.post('/sync', async (c) => {
     return badRequest(c, 'MiniMax API key not configured')
   }
 
-  // 调用 MiniMax get_voice API
+  // Call MiniMax get_voice API
   const resp = await fetch(joinProviderUrl(config.baseUrl, '/v1', '/get_voice'), {
     method: 'POST',
     headers: {
@@ -68,10 +68,10 @@ app.post('/sync', async (c) => {
   const voices = (result.system_voice || []).filter((v: any) => shouldKeepVoice(v))
   const ts = now()
 
-  // 先清空旧数据
+  // Clear old data first
   db.delete(schema.aiVoices).where(eq(schema.aiVoices.provider, 'minimax')).run()
 
-  // 批量插入新数据
+  // Bulk-insert new data
   const insertRows = voices.map((v: any) => ({
     voiceId: v.voice_id,
     voiceName: v.voice_name,
@@ -89,33 +89,36 @@ app.post('/sync', async (c) => {
 })
 
 /**
- * 从 voice_id 或 voice_name 推断语言
+ * Infer language from voice_id or voice_name.
+ * MiniMax voice_ids embed the language (e.g. Cantonese_ProfessionalHost,
+ * Chinese (Mandarin)_News_Anchor) so we match the provider's own naming convention.
  */
 function extractLanguage(voiceId: string, voiceName: string): string {
   const text = `${voiceId} ${voiceName}`.toLowerCase()
-  if (text.includes('cantonese') || text.includes('粤')) return '粤语'
-  if (text.includes('english') || text.includes('aussie')) return '英语'
-  if (text.includes('japanese') || text.includes('日语')) return '日语'
-  if (text.includes('korean') || text.includes('韩')) return '韩语'
-  if (text.includes('spanish')) return '西班牙语'
-  if (text.includes('portuguese')) return '葡萄牙语'
-  if (text.includes('french')) return '法语'
-  if (text.includes('indonesian')) return '印尼语'
-  if (text.includes('german')) return '德语'
-  if (text.includes('russian')) return '俄语'
-  if (text.includes('italian')) return '意大利语'
-  if (text.includes('arabic')) return '阿拉伯语'
-  if (text.includes('turkish')) return '土耳其语'
-  if (text.includes('ukrainian')) return '乌克兰语'
-  if (text.includes('dutch')) return '荷兰语'
-  if (text.includes('vietnamese')) return '越南语'
-  if (text.includes('chinese') || text.includes('mandarin') || text.includes('中文')) return '中文'
-  return '其他'
+  if (text.includes('cantonese')) return 'Cantonese'
+  if (text.includes('english') || text.includes('aussie')) return 'English'
+  if (text.includes('japanese')) return 'Japanese'
+  if (text.includes('korean')) return 'Korean'
+  if (text.includes('spanish')) return 'Spanish'
+  if (text.includes('portuguese')) return 'Portuguese'
+  if (text.includes('french')) return 'French'
+  if (text.includes('indonesian')) return 'Indonesian'
+  if (text.includes('german')) return 'German'
+  if (text.includes('russian')) return 'Russian'
+  if (text.includes('italian')) return 'Italian'
+  if (text.includes('arabic')) return 'Arabic'
+  if (text.includes('turkish')) return 'Turkish'
+  if (text.includes('ukrainian')) return 'Ukrainian'
+  if (text.includes('dutch')) return 'Dutch'
+  if (text.includes('vietnamese')) return 'Vietnamese'
+  if (text.includes('chinese') || text.includes('mandarin')) return 'Chinese'
+  return 'Other'
 }
 
 function shouldKeepVoice(voice: { voice_id: string, voice_name: string }) {
+  // Keep Chinese, Cantonese, and English voices. Other languages are filtered out.
   const language = extractLanguage(voice.voice_id, voice.voice_name)
-  if (language !== '中文' && language !== '粤语') return false
+  if (!['Chinese', 'Cantonese', 'English'].includes(language)) return false
 
   const text = `${voice.voice_id} ${voice.voice_name}`.toLowerCase()
 

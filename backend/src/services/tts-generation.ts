@@ -1,6 +1,6 @@
 /**
- * TTS 语音合成服务
- * 支持 MiniMax TTS (hex 音频响应) 和 OpenAI 兼容 /audio/speech
+ * TTS voice synthesis service
+ * Supports MiniMax TTS (hex audio response) and OpenAI-compatible /audio/speech
  */
 import fs from 'fs'
 import path from 'path'
@@ -23,7 +23,7 @@ interface TTSParams {
 }
 
 /**
- * 生成 TTS 音频，返回本地文件路径
+ * Generate TTS audio and return the local file path
  */
 export async function generateTTS(params: TTSParams): Promise<string> {
   const config = getAudioConfigById(params.configId)
@@ -75,10 +75,10 @@ export async function generateTTS(params: TTSParams): Promise<string> {
   const result = await resp.json()
   const parsed = adapter.parseResponse(result)
 
-  // 将 hex 解码为二进制
+  // Decode hex to binary
   const buffer = Buffer.from(parsed.audioHex, 'hex')
 
-  // 保存到本地
+  // Save to local storage
   const audioDir = path.join(STORAGE_ROOT, 'audio')
   fs.mkdirSync(audioDir, { recursive: true })
   const filename = `${uuid()}.${parsed.format || 'mp3'}`
@@ -97,9 +97,9 @@ export async function generateTTS(params: TTSParams): Promise<string> {
 }
 
 /**
- * 为角色生成试听音频
+ * Generate a sample voice clip for a character
  */
 export async function generateVoiceSample(characterName: string, voiceId: string, configId?: number | null): Promise<string> {
-  const sampleText = `你好，我是${characterName}。很高兴认识你，这是我的声音试听。`
+  const sampleText = `Hello, this is ${characterName}. Nice to meet you — here's a sample of my voice.`
   return generateTTS({ text: sampleText, voice: voiceId, configId })
 }

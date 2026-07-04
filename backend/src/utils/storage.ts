@@ -1,5 +1,5 @@
 /**
- * 文件存储工具 — 下载远程文件到本地
+ * File storage utility — download remote files to local storage
  */
 import fs from 'fs'
 import path from 'path'
@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const STORAGE_ROOT = process.env.STORAGE_PATH || path.resolve(__dirname, '../../../data/static')
 
 /**
- * 下载远程文件到本地存储
+ * Download a remote file to local storage
  */
 export async function downloadFile(url: string, subDir: string): Promise<string> {
   const dir = path.join(STORAGE_ROOT, subDir)
@@ -27,12 +27,12 @@ export async function downloadFile(url: string, subDir: string): Promise<string>
   const buffer = Buffer.from(await resp.arrayBuffer())
   fs.writeFileSync(filePath, buffer)
 
-  // 返回相对路径（供 API 返回给前端）
+  // Return relative path (consumed by frontend via API)
   return `static/${subDir}/${filename}`
 }
 
 /**
- * 保存上传的文件
+ * Save an uploaded file
  */
 export async function saveUploadedFile(data: ArrayBuffer, subDir: string, originalName: string): Promise<string> {
   const dir = path.join(STORAGE_ROOT, subDir)
@@ -56,7 +56,7 @@ function getExtFromUrl(url: string): string {
 }
 
 /**
- * 获取本地文件的绝对路径
+ * Get the absolute path of a local file
  */
 export function getAbsolutePath(relativePath: string): string {
   if (relativePath.startsWith('static/')) {
@@ -66,14 +66,14 @@ export function getAbsolutePath(relativePath: string): string {
 }
 
 /**
- * 保存 Base64 编码的图片数据到本地存储
- * 用于 Gemini 等只返回 base64 数据的厂商
+ * Save Base64-encoded image data to local storage
+ * Used for providers like Gemini that return only base64 data
  */
 export async function saveBase64Image(base64Data: string, mimeType: string, subDir: string): Promise<string> {
   const dir = path.join(STORAGE_ROOT, subDir)
   fs.mkdirSync(dir, { recursive: true })
 
-  // 从 mimeType 推断文件扩展名
+  // Infer file extension from mimeType
   const ext = mimeTypeToExt(mimeType)
   const filename = `${uuid()}${ext}`
   const filePath = path.join(dir, filename)

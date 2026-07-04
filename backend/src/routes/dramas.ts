@@ -73,7 +73,7 @@ app.post('/', async (c) => {
     db.insert(schema.episodes).values({
       dramaId: result.id,
       episodeNumber: i,
-      title: `第${i}集`,
+      title: `Episode ${i}`,
       status: 'draft',
       createdAt: ts,
       updatedAt: ts,
@@ -100,7 +100,7 @@ app.get('/stats', async (c) => {
 app.get('/:id', async (c) => {
   const id = Number(c.req.param('id'))
   const [drama] = await db.select().from(schema.dramas).where(eq(schema.dramas.id, id))
-  if (!drama) return notFound(c, '剧本不存在')
+  if (!drama) return notFound(c, 'Drama not found')
 
   const eps = await db.select().from(schema.episodes)
     .where(eq(schema.episodes.dramaId, id))
@@ -176,7 +176,7 @@ app.put('/:id/episodes', async (c) => {
         ...ep,
         dramaId,
         episodeNumber: ep.episode_number || ep.episodeNumber || 1,
-        title: ep.title || '未命名',
+        title: ep.title || 'Untitled',
         createdAt: ts,
         updatedAt: ts,
       })

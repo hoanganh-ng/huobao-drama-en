@@ -1,7 +1,7 @@
 /**
- * OpenAI DALL-E 图片生成 Adapter
- * 端点: /v1/images/generations (注意 /v1 前缀)
- * 响应格式: { data: [{ url: "..." }] } 或 { data: [{ b64_json: "..." }] }
+ * OpenAI DALL-E image generation Adapter
+ * Endpoint: /v1/images/generations (note the /v1 prefix)
+ * Response format: { data: [{ url: "..." }] } or { data: [{ b64_json: "..." }] }
  */
 import type {
   ImageProviderAdapter,
@@ -17,7 +17,7 @@ export class OpenAIImageAdapter implements ImageProviderAdapter {
   provider = 'openai'
 
   buildGenerateRequest(config: AIConfig, record: ImageGenerationRecord): ProviderRequest {
-    // OpenAI 使用 size 字段，格式为 "1024x1024"
+    // OpenAI uses the size field, format "1024x1024"
     const size = record.size || '1024x1024'
 
     const body: any = {
@@ -25,7 +25,7 @@ export class OpenAIImageAdapter implements ImageProviderAdapter {
       prompt: record.prompt,
       size,
       n: 1,
-      response_format: 'url', // 默认返回 URL，可选 'b64_json'
+      response_format: 'url', // URL by default, 'b64_json' is an option
     }
 
     return {
@@ -40,7 +40,7 @@ export class OpenAIImageAdapter implements ImageProviderAdapter {
   }
 
   parseGenerateResponse(result: any): ImageGenResponse {
-    // OpenAI DALL-E 3 目前是同步返回，但规范上也有异步 task 模式
+    // OpenAI DALL-E 3 is currently sync, but the spec also supports async task mode
     if (result.task_id || result.id) {
       return { isAsync: true, taskId: result.task_id || result.id }
     }
@@ -48,10 +48,10 @@ export class OpenAIImageAdapter implements ImageProviderAdapter {
     if (imageUrl) {
       return { isAsync: false, imageUrl }
     }
-    // b64_json 模式
+    // b64_json mode
     const b64 = result.data?.[0]?.b64_json
     if (b64) {
-      // 对于 base64，返回特殊标记，实际处理在 extractImageBase64
+      // For base64, return a special marker, the actual processing happens in extractImageBase64
       return { isAsync: false, imageUrl: undefined }
     }
     throw new Error('No image URL in response')

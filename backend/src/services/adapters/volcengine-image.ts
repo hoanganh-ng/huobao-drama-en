@@ -1,7 +1,7 @@
 /**
- * 火山引擎 veImageX 图片生成 Adapter
- * 端点: /api/v3/images/generations (注意 /api/v3 前缀)
- * 响应格式: { data: [{ url: "..." }] }
+ * Volcengine veImageX image generation Adapter
+ * Endpoint: /api/v3/images/generations (note the /api/v3 prefix)
+ * Response format: { data: [{ url: "..." }] }
  */
 import type {
   ImageProviderAdapter,
@@ -17,7 +17,7 @@ export class VolcEngineImageAdapter implements ImageProviderAdapter {
   provider = 'volcengine'
 
   buildGenerateRequest(config: AIConfig, record: ImageGenerationRecord): ProviderRequest {
-    // 火山引擎使用 seedream 模型
+    // Volcengine uses the seedream model
     const model = record.model || config.model || 'doubao-seedream-5-0-lite'
 
     const body: any = {
@@ -25,7 +25,7 @@ export class VolcEngineImageAdapter implements ImageProviderAdapter {
       prompt: record.prompt,
     }
 
-    // 尺寸参数
+    // Size param
     if (record.size) {
       const [w, h] = record.size.split('x')
       if (w && h) {
@@ -46,11 +46,11 @@ export class VolcEngineImageAdapter implements ImageProviderAdapter {
   }
 
   parseGenerateResponse(result: any): ImageGenResponse {
-    // 火山引擎可能返回 task_id 进行轮询
+    // Volcengine may return task_id for polling
     if (result.task_id || result.id) {
       return { isAsync: true, taskId: result.task_id || result.id }
     }
-    // 同步返回
+    // Sync return
     const imageUrl = result.data?.[0]?.url || result.url
     if (imageUrl) {
       return { isAsync: false, imageUrl }

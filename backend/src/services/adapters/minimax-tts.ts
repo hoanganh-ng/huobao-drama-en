@@ -1,7 +1,7 @@
 /**
- * MiniMax 语音合成（TTS）Adapter
+ * MiniMax TTS Adapter
  * API: POST /v1/t2a_v2
- * 响应: { data: { audio: "<hex>", status: 2 }, ... }
+ * Response: { data: { audio: "<hex>", status: 2 }, ... }
  */
 import type { TTSProviderAdapter } from './types'
 import { joinProviderUrl } from './url'

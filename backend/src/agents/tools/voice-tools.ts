@@ -1,5 +1,5 @@
 /**
- * 角色音色分配 Agent 工具
+ * Voice Assigner Agent tools
  */
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
@@ -30,7 +30,7 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
           role: c.role,
           personality: c.personality,
           description: c.description,
-          current_voice: c.voiceStyle || '未分配',
+          current_voice: c.voiceStyle || 'unassigned',
         })),
       }
       logTaskSuccess('VoiceTool', 'get-characters', { episodeId, dramaId, count: payload.characters.length })
@@ -51,24 +51,24 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
           id: v.voiceId,
           name: v.voiceName,
           gender: inferGender(v.voiceName, desc),
-          traits: Array.isArray(desc) && desc.length ? desc.slice(0, 2).join('、') : `${v.language || '多语言'}音色`,
-          suitable_for: Array.isArray(desc) && desc.length > 2 ? desc.slice(2).join('、') : `${v.language || '通用'}角色`,
+          traits: Array.isArray(desc) && desc.length ? desc.slice(0, 2).join(', ') : `${v.language || 'Multilingual'} voice`,
+          suitable_for: Array.isArray(desc) && desc.length > 2 ? desc.slice(2).join(', ') : `${v.language || 'General'} character`,
           language: v.language,
           provider,
         }
       }) : [
-        { id: 'alloy', name: 'Alloy', gender: '中性', traits: '平衡自然', suitable_for: '旁白、通用', language: '多语言', provider },
-        { id: 'echo', name: 'Echo', gender: '男声', traits: '低沉稳重', suitable_for: '成熟男性、旁白', language: '多语言', provider },
-        { id: 'fable', name: 'Fable', gender: '男声', traits: '温暖富有表现力', suitable_for: '年轻男性、故事叙述', language: '多语言', provider },
-        { id: 'onyx', name: 'Onyx', gender: '男声', traits: '深沉有力', suitable_for: '权威角色、反派', language: '多语言', provider },
-        { id: 'nova', name: 'Nova', gender: '女声', traits: '温柔甜美', suitable_for: '年轻女性、女主', language: '多语言', provider },
-        { id: 'shimmer', name: 'Shimmer', gender: '女声', traits: '明亮活泼', suitable_for: '活泼女性、少女', language: '多语言', provider },
+        { id: 'alloy', name: 'Alloy', gender: 'Neutral', traits: 'Balanced, natural', suitable_for: 'Narration, general', language: 'Multilingual', provider },
+        { id: 'echo', name: 'Echo', gender: 'Male', traits: 'Deep, steady', suitable_for: 'Mature male, narration', language: 'Multilingual', provider },
+        { id: 'fable', name: 'Fable', gender: 'Male', traits: 'Warm, expressive', suitable_for: 'Young male, storytelling', language: 'Multilingual', provider },
+        { id: 'onyx', name: 'Onyx', gender: 'Male', traits: 'Deep, powerful', suitable_for: 'Authoritative characters, villains', language: 'Multilingual', provider },
+        { id: 'nova', name: 'Nova', gender: 'Female', traits: 'Gentle, sweet', suitable_for: 'Young women, heroines', language: 'Multilingual', provider },
+        { id: 'shimmer', name: 'Shimmer', gender: 'Female', traits: 'Bright, lively', suitable_for: 'Lively women, girls', language: 'Multilingual', provider },
       ]
 
       const payload = {
         provider,
         voices,
-        instruction: '根据角色的性别、性格、年龄来匹配最合适的音色，并且只能从当前集音频配置可用的音色列表中选择。',
+        instruction: 'Match the most suitable voice based on the character\'s gender, personality, and age, and only select from the voice list available to the current episode\'s audio configuration.',
       }
       logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length })
       return payload
@@ -101,7 +101,7 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
 function inferGender(name: string, desc: unknown) {
   const description = Array.isArray(desc) ? desc.join(' ') : ''
   const text = `${name} ${description}`
-  if (/[男|青年|大爷|学长|boy|man|male]/i.test(text)) return '男声'
-  if (/[女|少女|御姐|奶奶|girl|woman|female]/i.test(text)) return '女声'
-  return '中性'
+  if (/(boy|man|male)/i.test(text)) return 'Male'
+  if (/(girl|woman|female)/i.test(text)) return 'Female'
+  return 'Neutral'
 }

@@ -1,11 +1,11 @@
 /**
- * 角色/场景提取 Agent 工具
- * 工厂函数模式 — 注入 episodeId + dramaId
+ * Character/Scene Extractor Agent tools
+ * Factory pattern — injects episodeId + dramaId
  *
- * 单 Agent 一步流程：
- * 1. 读取剧本内容
- * 2. 读取项目中已存在的角色/场景（用于去重）
- * 3. 提取角色/场景并智能去重后直接保存
+ * Single-Agent one-step flow:
+ * 1. Read the script content
+ * 2. Read characters/scenes already existing in the project (for dedup)
+ * 3. Extract characters/scenes, intelligently dedup, and save directly
  */
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
@@ -14,7 +14,7 @@ import { eq, and } from 'drizzle-orm'
 import { now } from '../../utils/response.js'
 import { logTaskProgress, logTaskSuccess } from '../../utils/task-logger.js'
 
-// ─── 关联辅助 ────────────────────────────────────────────────
+// ─── Link helpers ────────────────────────────────────────────────
 function linkCharToEpisode(episodeId: number, characterId: number) {
   const ts = now()
   const existing = db.select().from(schema.episodeCharacters)
@@ -37,7 +37,7 @@ function linkSceneToEpisode(episodeId: number, sceneId: number) {
 
 export function createExtractTools(episodeId: number, dramaId: number) {
 
-  // 1. 读取剧本内容
+  // 1. Read the script content
   const readScriptForExtraction = createTool({
     id: 'read_script_for_extraction',
     description: 'Read the formatted screenplay for character/scene extraction.',
@@ -53,7 +53,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
     },
   })
 
-  // 2. 读取项目中已存在的角色（用于去重判断）
+  // 2. Read characters already existing in the project (for dedup judgment)
   const readExistingCharacters = createTool({
     id: 'read_existing_characters',
     description: 'Read all characters already existing in this drama project (for deduplication).',
@@ -82,7 +82,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
     },
   })
 
-  // 3. 读取项目中已存在的场景（用于去重判断）
+  // 3. Read scenes already existing in the project (for dedup judgment)
   const readExistingScenes = createTool({
     id: 'read_existing_scenes',
     description: 'Read all scenes already existing in this drama project (for deduplication).',
@@ -111,7 +111,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
     },
   })
 
-  // 4. 智能保存角色（按名字去重，与现有数据合并）
+  // 4. Smart-save characters (dedup by name, merge with existing data)
   const saveDedupCharacters = createTool({
     id: 'save_dedup_characters',
     description: 'Save extracted characters with deduplication. Existing characters (same name) are merged/updated; new ones are created. All are linked to the current episode.',
@@ -140,7 +140,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
           .find(c => c.name === char.name)
 
         if (existing) {
-          // 已存在：合并信息，保留 ID
+          // Already exists: merge info, preserve ID
           db.update(schema.characters).set({
             role: char.role || existing.role,
             description: char.description || existing.description,
@@ -151,7 +151,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
           linkCharToEpisode(episodeId, existing.id)
           results.merged++
         } else {
-          // 新增角色
+          // New character
           const res = db.insert(schema.characters).values({
             name: char.name,
             role: char.role || '',
@@ -169,7 +169,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
       }
 
       const payload = {
-        message: `角色保存完成：新增 ${results.created}，合并更新 ${results.merged}`,
+        message: `Character save complete: ${results.created} new, ${results.merged} merged/updated`,
         ...results,
       }
       logTaskSuccess('ExtractTool', 'save-characters-complete', { episodeId, ...results })
@@ -177,7 +177,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
     },
   })
 
-  // 5. 智能保存场景（按地点+时间段去重，与现有数据合并）
+  // 5. Smart-save scenes (dedup by location+time of day, merge with existing data)
   const saveDedupScenes = createTool({
     id: 'save_dedup_scenes',
     description: 'Save extracted scenes with deduplication. Existing scenes (same location+time) are reused; new ones are created. All are linked to the current episode.',
@@ -198,18 +198,18 @@ export function createExtractTools(episodeId: number, dramaId: number) {
       })
 
       for (const scene of scenes) {
-        // 按地点+时间段精确匹配
+        // Exact match by location + time of day
         const existing = db.select().from(schema.scenes)
           .where(eq(schema.scenes.dramaId, dramaId)).all()
           .filter(s => !s.deletedAt)
           .find(s => s.location === scene.location && s.time === (scene.time || ''))
 
         if (existing) {
-          // 已存在完全匹配的场景：直接关联
+          // A fully matching scene already exists: link directly
           linkSceneToEpisode(episodeId, existing.id)
           results.reused++
         } else {
-          // 检查是否有同地点不同时段（保留现有，新增独立场景）
+          // Check whether the same location exists at a different time of day (preserve existing, add independent scene)
           const sameLocation = db.select().from(schema.scenes)
             .where(eq(schema.scenes.dramaId, dramaId)).all()
             .filter(s => !s.deletedAt)
@@ -230,7 +230,7 @@ export function createExtractTools(episodeId: number, dramaId: number) {
       }
 
       const payload = {
-        message: `场景保存完成：新增 ${results.created}，复用已有 ${results.reused}`,
+        message: `Scene save complete: ${results.created} new, ${results.reused} reused existing`,
         ...results,
       }
       logTaskSuccess('ExtractTool', 'save-scenes-complete', { episodeId, ...results })

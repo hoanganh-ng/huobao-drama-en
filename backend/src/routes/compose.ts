@@ -8,7 +8,7 @@ import { toSnakeCase } from '../utils/transform.js'
 
 const app = new Hono()
 
-// POST /storyboards/:id/compose — 合成单个镜头
+// POST /storyboards/:id/compose — compose a single storyboard
 app.post('/storyboards/:id/compose', async (c) => {
   const id = Number(c.req.param('id'))
   try {
@@ -22,7 +22,7 @@ app.post('/storyboards/:id/compose', async (c) => {
   }
 })
 
-// POST /episodes/:id/compose-all — 批量合成全部镜头
+// POST /episodes/:id/compose-all — batch-compose all storyboards
 app.post('/episodes/:id/compose-all', async (c) => {
   const episodeId = Number(c.req.param('id'))
   const storyboards = db.select().from(schema.storyboards)
@@ -35,7 +35,7 @@ app.post('/episodes/:id/compose-all', async (c) => {
   const withVideo = storyboards.filter(sb => sb.videoUrl)
   if (withVideo.length === 0) return badRequest(c, 'No storyboards have video yet')
 
-  // 异步处理
+  // Async processing
   db.update(schema.storyboards)
     .set({ status: 'compose_processing' })
     .where(eq(schema.storyboards.episodeId, episodeId))
@@ -59,7 +59,7 @@ app.post('/episodes/:id/compose-all', async (c) => {
   })
 })
 
-// GET /episodes/:id/compose-status — 查询批量合成状态
+// GET /episodes/:id/compose-status — query batch-compose status
 app.get('/episodes/:id/compose-status', async (c) => {
   const episodeId = Number(c.req.param('id'))
   const storyboards = db.select().from(schema.storyboards)
@@ -84,7 +84,7 @@ app.get('/episodes/:id/compose-status', async (c) => {
       storyboardNumber: sb.storyboardNumber,
       status: sb.status || 'pending',
       composedVideoUrl: sb.composedVideoUrl,
-      errorMsg: sb.status === 'compose_failed' ? '视频合成失败，请检查视频、配音或字幕素材' : '',
+      errorMsg: sb.status === 'compose_failed' ? 'Video composition failed. Please check the video, voice, or subtitle assets.' : '',
     })),
   })
 })

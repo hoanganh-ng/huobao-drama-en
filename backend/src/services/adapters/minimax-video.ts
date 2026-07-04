@@ -1,6 +1,6 @@
 /**
- * MiniMax 视频生成 Adapter
- * API 风格：OpenAI Chat Completions content 数组格式
+ * MiniMax video generation Adapter
+ * API style: OpenAI Chat Completions content array format
  */
 import type {
   VideoProviderAdapter,
@@ -53,7 +53,7 @@ export class MiniMaxVideoAdapter implements VideoProviderAdapter {
   parseGenerateResponse(result: any): VideoGenResponse {
     const taskId = result.task_id || result.id || result.data?.id
     if (!taskId) {
-      // 同步返回
+      // Sync return
       const videoUrl = result.video_url || result.data?.video_url || result.content?.video_url
       if (videoUrl) {
         return { isAsync: false, videoUrl }

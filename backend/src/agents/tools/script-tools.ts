@@ -1,6 +1,6 @@
 /**
- * 剧本改写 Agent 工具
- * 工厂函数模式 — 注入 episodeId，工具不再需要 LLM 传递 ID
+ * Script Rewriter Agent tools
+ * Factory pattern — injects episodeId, so tools no longer need the LLM to pass the ID
  */
 import { createTool } from '@mastra/core/tools'
 import { z } from 'zod'
@@ -38,17 +38,17 @@ export function createScriptTools(episodeId: number) {
 
       return {
         source_content: source,
-        instruction: `请将以下内容改写为格式化剧本。
+        instruction: `Please rewrite the following content into a formatted screenplay.
 
-格式规范：
-- 场景头：## S编号 | 内景/外景 · 地点 | 时间段
-- 动作描写：自然段落，不包含镜头语言
-- 对白：角色名：（状态/表情）台词内容
-- 每个场景 30-60 秒内容
+Formatting specification:
+- Scene header: ## S<number> | Interior/Exterior · Location | Time of day
+- Action description: natural paragraphs, no camera language
+- Dialogue: Character name: (state/expression) line content
+- Each scene should be 30-60 seconds of content
 
 ${instructions || ''}
 
-【原始内容】
+【Original content】
 ${source}`,
       }
     },

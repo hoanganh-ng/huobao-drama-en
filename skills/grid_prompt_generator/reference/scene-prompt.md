@@ -1,6 +1,6 @@
-# 场景图片提示词模板
+# Scene image prompt template
 
-## 模板结构
+## Template structure
 
 ```
 A cinematic [style] pure background scene depicting [location] at [time].
@@ -10,7 +10,7 @@ Style: [art style], rich details, high quality, atmospheric lighting.
 Mood: [mood description].
 ```
 
-## 示例
+## Example
 
 ```
 A cinematic anime-style pure background scene depicting a traditional Japanese courtyard at dusk.

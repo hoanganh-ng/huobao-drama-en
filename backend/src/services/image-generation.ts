@@ -85,7 +85,7 @@ async function processImageGeneration(id: number, config: AIConfig) {
       frameType: record.frameType,
     })
 
-    // 使用 Adapter 构建请求
+    // Build request via Adapter
     const resolvedReferenceImages = await normalizeReferenceImages(record.referenceImages)
     const { url, method, headers, body } = adapter.buildGenerateRequest(config, {
       id: record.id,
@@ -129,13 +129,13 @@ async function processImageGeneration(id: number, config: AIConfig) {
 
     if (!isAsync && imageUrl) {
       logTaskProgress('ImageTask', 'sync-complete', { id, imageUrl })
-      // 同步模式：直接下载图片
+      // Sync mode: download the image directly
       await handleImageComplete(id, config.provider, imageUrl)
       return
     }
 
     if (!isAsync && !imageUrl) {
-      // 同步模式但无 URL（Gemini 等返回 base64）
+      // Sync mode but no URL (e.g. Gemini returns base64)
       const b64 = adapter.extractImageBase64(result)
       if (b64) {
         logTaskProgress('ImageTask', 'sync-base64-complete', { id, mimeType: b64.mimeType })
@@ -145,7 +145,7 @@ async function processImageGeneration(id: number, config: AIConfig) {
       throw new Error('No image URL or base64 data in response')
     }
 
-    // 异步模式：更新 taskId，开始轮询
+    // Async mode: update taskId and start polling
     db.update(schema.imageGenerations)
       .set({ taskId, status: 'processing', updatedAt: now() })
       .where(eq(schema.imageGenerations.id, id))
@@ -249,7 +249,7 @@ async function pollImageTask(id: number, config: AIConfig, taskId: string) {
         return
       }
       if (pollResp.status === 'completed' && adapter.provider === 'gemini') {
-        // Gemini 可能返回 base64
+        // Gemini may return base64
         const b64 = adapter.extractImageBase64(result)
         if (b64) {
           logTaskSuccess('ImageTask', 'poll-base64-complete', { id, taskId, mimeType: b64.mimeType })
@@ -286,7 +286,7 @@ async function handleImageComplete(id: number, provider: string, imageUrl: strin
     .run()
   logTaskSuccess('ImageTask', 'downloaded', { id, provider, localPath })
 
-  // 更新关联表
+  // Update related table
   if (record?.storyboardId) {
     const sbUpdate: Record<string, any> = { updatedAt: now() }
     if (record.frameType === 'first_frame') sbUpdate.firstFrameImage = localPath
@@ -313,7 +313,7 @@ async function handleImageCompleteBase64(id: number, provider: string, base64Dat
     .run()
   logTaskSuccess('ImageTask', 'saved-base64', { id, provider, mimeType, localPath })
 
-  // 更新关联表
+  // Update related table
   if (record?.storyboardId) {
     const sbUpdate: Record<string, any> = { updatedAt: now() }
     if (record.frameType === 'first_frame') sbUpdate.firstFrameImage = localPath

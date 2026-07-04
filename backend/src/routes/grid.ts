@@ -21,7 +21,7 @@ function posLabel(i: number, rows: number, cols: number) {
 }
 
 function cellLabel(i: number, rows: number, cols: number) {
-  return `格${i + 1}（${posLabel(i, rows, cols)}）`
+  return `cell ${i + 1} (${posLabel(i, rows, cols)})`
 }
 
 function safeParseJsonArray(value: any): string[] {
@@ -81,24 +81,24 @@ function collectGridReferenceAssets(storyboards: any[]) {
   }
 
   for (const sb of storyboards) {
-    pushAsset(sb.firstFrameImage, `镜头${sb.storyboardNumber}首帧`, 'storyboard', { storyboardId: sb.id })
-    pushAsset(sb.lastFrameImage, `镜头${sb.storyboardNumber}尾帧`, 'storyboard', { storyboardId: sb.id })
-    pushAsset(sb.composedImage, `镜头${sb.storyboardNumber}镜头图`, 'storyboard', { storyboardId: sb.id })
+    pushAsset(sb.firstFrameImage, `shot ${sb.storyboardNumber} first frame`, 'storyboard', { storyboardId: sb.id })
+    pushAsset(sb.lastFrameImage, `shot ${sb.storyboardNumber} last frame`, 'storyboard', { storyboardId: sb.id })
+    pushAsset(sb.composedImage, `shot ${sb.storyboardNumber} composed`, 'storyboard', { storyboardId: sb.id })
     for (const ref of safeParseJsonArray(sb.referenceImages)) {
-      pushAsset(ref, `镜头${sb.storyboardNumber}参考图`, 'storyboard', { storyboardId: sb.id })
+      pushAsset(ref, `shot ${sb.storyboardNumber} reference`, 'storyboard', { storyboardId: sb.id })
     }
   }
   for (const scene of scenes) {
-    pushAsset(scene.imageUrl, `${scene.location}${scene.time ? `（${scene.time}）` : ''}场景`, 'scene', { sceneId: scene.id })
+    pushAsset(scene.imageUrl, `${scene.location}${scene.time ? ` (${scene.time})` : ''} scene`, 'scene', { sceneId: scene.id })
   }
   for (const char of characters) {
-    pushAsset(char.imageUrl, `${char.name}角色`, 'character', { characterId: char.id })
+    pushAsset(char.imageUrl, `${char.name} character`, 'character', { characterId: char.id })
   }
 
   return assets.map((asset, index) => ({
     ...asset,
     imageIndex: index + 1,
-    imageLabel: `图片${index + 1}`,
+    imageLabel: `image ${index + 1}`,
   }))
 }
 
@@ -150,12 +150,12 @@ function buildGridPrompt(
     const cells = storyboards.map((sb, i) => {
       const desc = sb.imagePrompt || sb.description || sb.title || `shot ${i + 1}`
       const refs = buildStoryboardReferenceHints(sb, referenceAssets, storyboardCharacterIds)
-      return `${cellLabel(i, rows, cols)}: ${refs.length ? `参考${refs.join('、')}，` : ''}${desc}`
+      return `${cellLabel(i, rows, cols)}: ${refs.length ? `references ${refs.join(', ')}, ` : ''}${desc}`
     })
     return [
       `${rows}x${cols} grid layout, consistent art style, ${style},`,
-      legend ? `参考图映射：${legend}` : '',
-      '当画面涉及角色或场景时，优先使用对应的图片编号来约束一致性。',
+      legend ? `Reference image map: ${legend}` : '',
+      'When a shot involves a character or scene, prioritize the corresponding image number to enforce consistency.',
       ...cells,
       'high quality, cinematic lighting, no text, no watermark',
     ].filter(Boolean).join('\n')
@@ -172,11 +172,11 @@ function buildGridPrompt(
       const frameHint = i % 2 === 0
         ? 'opening moment'
         : `${action ? `${action}, ` : ''}closing moment, subtle motion change`
-      return `${cellLabel(i, rows, cols)}: ${refs.length ? `参考${refs.join('、')}，` : ''}${desc}, ${frameHint}`
+      return `${cellLabel(i, rows, cols)}: ${refs.length ? `references ${refs.join(', ')}, ` : ''}${desc}, ${frameHint}`
     })
     return [
       `${rows}x${cols} grid layout, consistent art style, ${style},`,
-      legend ? `参考图映射：${legend}` : '',
+      legend ? `Reference image map: ${legend}` : '',
       'first/last frame visual rhythm, alternating opening and closing beats across the grid,',
       ...cells,
       'continuous motion implied between left and right, high quality, no text',
@@ -200,11 +200,11 @@ function buildGridPrompt(
     ]
     const totalCells = rows * cols
     const cells = Array.from({ length: totalCells }, (_, i) => {
-      return `${cellLabel(i, rows, cols)}: ${legend ? `参考${legend}，` : ''}${desc}, ${angles[i % angles.length]}`
+      return `${cellLabel(i, rows, cols)}: ${legend ? `references ${legend}, ` : ''}${desc}, ${angles[i % angles.length]}`
     })
     return [
       `${rows}x${cols} grid layout, same scene different angles and compositions, ${style},`,
-      legend ? `参考图映射：${legend}` : '',
+      legend ? `Reference image map: ${legend}` : '',
       `main scene: ${desc},`,
       ...cells,
       'consistent lighting and color palette, high quality, no text',
@@ -241,7 +241,7 @@ function buildGridCellPrompts(
     return Array.from({ length: rows * cols }, (_, i) => ({
       shot_number: sb.storyboardNumber,
       frame_type: 'reference',
-      prompt: `${cellLabel(i, rows, cols)}: ${buildStoryboardReferenceHints(sb, referenceAssets, storyboardCharacterIds).join('、')}${buildStoryboardReferenceHints(sb, referenceAssets, storyboardCharacterIds).length ? '，' : ''}${desc}, ${angles[i % angles.length]}`,
+      prompt: `${cellLabel(i, rows, cols)}: ${buildStoryboardReferenceHints(sb, referenceAssets, storyboardCharacterIds).join(', ')}${buildStoryboardReferenceHints(sb, referenceAssets, storyboardCharacterIds).length ? ', ' : ''}${desc}, ${angles[i % angles.length]}`,
     }))
   }
 
@@ -256,8 +256,8 @@ function buildGridCellPrompts(
         shot_number: sb.storyboardNumber,
         frame_type: isFirst ? 'first_frame' : 'last_frame',
         prompt: isFirst
-          ? `${cellLabel(i, rows, cols)}，首帧：${refs.length ? `参考${refs.join('、')}，` : ''}${desc}${sb.location ? `, ${sb.location}` : ''}${sb.shotType ? `, ${sb.shotType}` : ''}`
-          : `${cellLabel(i, rows, cols)}，尾帧：${refs.length ? `参考${refs.join('、')}，` : ''}${desc}${motion ? `, ${motion}` : ''}${sb.location ? `, ${sb.location}` : ''}${sb.shotType ? `, ${sb.shotType}` : ''}`,
+          ? `${cellLabel(i, rows, cols)}, first frame: ${refs.length ? `references ${refs.join(', ')}, ` : ''}${desc}${sb.location ? `, ${sb.location}` : ''}${sb.shotType ? `, ${sb.shotType}` : ''}`
+          : `${cellLabel(i, rows, cols)}, last frame: ${refs.length ? `references ${refs.join(', ')}, ` : ''}${desc}${motion ? `, ${motion}` : ''}${sb.location ? `, ${sb.location}` : ''}${sb.shotType ? `, ${sb.shotType}` : ''}`,
       }
     })
   }
@@ -268,7 +268,7 @@ function buildGridCellPrompts(
     return {
       shot_number: sb.storyboardNumber,
       frame_type: 'first_frame',
-      prompt: `${cellLabel(index, rows, cols)}：${refs.length ? `参考${refs.join('、')}，` : ''}${desc}${sb.location ? `, ${sb.location}` : ''}${sb.shotType ? `, ${sb.shotType}` : ''}, opening scene`,
+      prompt: `${cellLabel(index, rows, cols)}: ${refs.length ? `references ${refs.join(', ')}, ` : ''}${desc}${sb.location ? `, ${sb.location}` : ''}${sb.shotType ? `, ${sb.shotType}` : ''}, opening scene`,
     }
   })
 }
@@ -360,15 +360,15 @@ async function tryAgentGridPrompt(
     [{
       role: 'user',
       content: [
-        '请为宫格图生成提示词，并优先调用工具完成。',
-        `选中镜头ID：${JSON.stringify(storyboardIds)}`,
-        `行数：${rows}`,
-        `列数：${cols}`,
-        `模式：${mode}`,
-        referenceLegend ? `参考图映射：${referenceLegend}` : '',
-        '当提示词涉及到某个角色或场景时，直接把对应的图片编号写进提示词，例如：图片1中的角色A站了起来，图片3中的房间场景。不要只写名字，不写图片编号。',
-        `必须严格按 ${rows}x${cols} 生成，总共 exactly ${rows * cols} visible panels。不要合并格子，不要缺格。`,
-        '必须返回 JSON，结构为：{"grid_prompt":"...","cell_prompts":[{"shot_number":1,"frame_type":"first_frame","prompt":"..."}]}',
+        'Please generate the prompt for a grid image. Prioritize using the available tools to complete this task.',
+        `Selected shot IDs: ${JSON.stringify(storyboardIds)}`,
+        `Rows: ${rows}`,
+        `Columns: ${cols}`,
+        `Mode: ${mode}`,
+        referenceLegend ? `Reference image map: ${referenceLegend}` : '',
+        'When the prompt involves a character or scene, write the corresponding image number directly into the prompt, e.g. the character in image 1 stands up, the room scene in image 3. Do not just write the name without the image number.',
+        `You MUST strictly follow ${rows}x${cols}, exactly ${rows * cols} visible panels in total. Do not merge cells, do not leave any cell empty.`,
+        'You MUST return JSON in this structure: {"grid_prompt":"...","cell_prompts":[{"shot_number":1,"frame_type":"first_frame","prompt":"..."}]}',
       ].join('\n'),
     }],
     { maxSteps: 10 },

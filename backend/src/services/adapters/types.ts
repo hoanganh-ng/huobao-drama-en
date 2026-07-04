@@ -1,49 +1,49 @@
 /**
- * 图片生成 Provider Adapter 接口
+ * Image-generation Provider Adapter interface
  */
 export interface ImageProviderAdapter {
-  /** 厂商标识 */
+  /** Vendor identifier */
   provider: string
 
   /**
-   * 构建图片生成请求
-   * @param config AI 配置 { baseUrl, apiKey, model }
-   * @param record 图片生成记录
+   * Build an image generation request
+   * @param config AI config { baseUrl, apiKey, model }
+   * @param record Image generation record
    */
   buildGenerateRequest(config: AIConfig, record: ImageGenerationRecord): ProviderRequest
 
   /**
-   * 解析生成响应，判断是同步还是异步
+   * Parse generation response, determine sync or async
    */
   parseGenerateResponse(result: any): ImageGenResponse
 
   /**
-   * 构建轮询请求
-   * @param config AI 配置
-   * @param taskId 任务 ID
+   * Build polling request
+   * @param config AI config
+   * @param taskId Task ID
    */
   buildPollRequest(config: AIConfig, taskId: string): ProviderRequest
 
   /**
-   * 解析轮询响应
+   * Parse polling response
    */
   parsePollResponse(result: any): ImagePollResponse
 
   /**
-   * 从响应中提取图片 URL（用于直接下载）
-   * 返回 null 表示图片数据是 base64 格式，需要用 extractImageBase64 处理
+   * Extract the image URL from the response (for direct download)
+   * Return null when image data is base64 and needs to be processed by extractImageBase64
    */
   extractImageUrl(result: any): string | null
 
   /**
-   * 从响应中提取 base64 图片数据
-   * 仅用于 Gemini 等只返回 base64 的厂商
+   * Extract base64 image data from the response
+   * Only used for vendors like Gemini that return base64 only
    */
   extractImageBase64(result: any): { data: string; mimeType: string } | null
 }
 
 /**
- * 视频生成 Provider Adapter 接口
+ * Video generation Provider Adapter interface
  */
 export interface VideoProviderAdapter {
   provider: string
@@ -59,7 +59,7 @@ export interface VideoProviderAdapter {
   extractVideoUrl(result: any): string | null
 }
 
-// ============ 通用类型 ============
+// ============ Common types ============
 
 export interface ProviderRequest {
   url: string
@@ -82,7 +82,7 @@ export interface ImageGenerationRecord {
   size?: string | null
   frameType?: string | null
   referenceImages?: string | null
-  // ... 其他字段
+  // ... other fields
 }
 
 export interface VideoGenerationRecord {
@@ -96,13 +96,13 @@ export interface VideoGenerationRecord {
   referenceImageUrls?: string | null
   duration?: number | null
   aspectRatio?: string | null
-  // ... 其他字段
+  // ... other fields
 }
 
 export interface ImageGenResponse {
   isAsync: boolean
   taskId?: string
-  /** 同步模式下直接返回的图片 URL */
+  /** Direct image URL in sync mode */
   imageUrl?: string
 }
 
@@ -125,7 +125,7 @@ export interface VideoPollResponse {
 }
 
 /**
- * TTS 语音合成 Provider Adapter
+ * TTS Provider Adapter
  */
 export interface TTSProviderAdapter {
   provider: string

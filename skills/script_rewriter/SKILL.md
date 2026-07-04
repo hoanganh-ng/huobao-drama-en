@@ -1,56 +1,56 @@
 ---
 name: script-rewriter
-description: 小说改写为格式化剧本的方法论和规范
+description: Methodology and conventions for adapting novels into formatted screenplays
 ---
 
-# 剧本改写指南
+# Script Rewriter Guide
 
-## 改写原则
+## Rewriting principles
 
-1. **保留核心情节**：不改变主线故事和角色关系
-2. **增强画面感**：将叙述性文字转化为可视化的场景描写
-3. **对话驱动**：用对白推动情节，减少旁白
-4. **节奏把控**：每场戏控制在 30-60 秒，适合短视频
-5. **不写镜头语言**：不涉及景别、角度、运镜，这些属于分镜拆解步骤
+1. **Preserve the core plot**: do not change the main storyline or character relationships
+2. **Enhance the visual feel**: turn narrative prose into visualizable scene descriptions
+3. **Dialogue-driven**: drive the plot with dialogue, reduce narration
+4. **Pace control**: each scene 30-60 seconds, suitable for short video
+5. **No camera language**: do not touch shot type, angle, or movement — those belong to the storyboard-breaking step
 
-## 格式化剧本格式
+## Formatted screenplay format
 
 ```
-## S01 | 内景 · 咖啡厅 | 黄昏
+## S01 | Interior · Coffee shop | Dusk
 
-黄昏的光线透过落地窗洒进咖啡厅，吧台上咖啡杯热气升腾。
+The dusk light streams through the floor-to-ceiling windows, steam rising from the coffee cup on the counter.
 
-小明独自坐在角落卡座，低头看手机，神情有些焦虑。
+Xiaoming sits alone in a corner booth, looking down at his phone, a bit anxious.
 
-门铃响起，小红推门而入。她看到小明，微笑着走过去。
+The doorbell rings. Xiaohong pushes the door open. Seeing Xiaoming, she smiles and walks over.
 
-小红：（微笑）等很久了吗？
-小明：（抬头）还好，刚到。
+Xiaohong: (smiling) Have you been waiting long?
+Xiaoming: (looking up) Not really, just got here.
 ```
 
-### 格式规则
+### Format rules
 
-- `## S编号 | 内景/外景 · 地点 | 时间段` — 场景头
-- 动作描写自然段 — 不包含任何镜头语言
-- `角色名：（状态/表情）台词内容` — 对白格式
+- `## S<number> | Interior/Exterior · Location | Time of day` — scene header
+- Action descriptions are natural paragraphs — no camera language
+- `Character name: (state/expression) line content` — dialogue format
 
-### 内容量参考
+### Volume reference
 
-格式化剧本相比原始内容增加约 20-30%，主要增量是场景头标记和对白格式化，不是扩写。
+A formatted screenplay is roughly 20-30% longer than the original content. The increase comes from scene headers and formatted dialogue, not from expansion.
 
-## 改写步骤
+## Rewriting steps
 
-1. 先调用 `read_episode_script` 读取原始内容
-2. 分析内容结构（对话、叙述、心理描写的比例）
-3. 调用 `rewrite_to_screenplay` 执行改写
-4. 检查改写结果，确认符合格式化剧本格式
-5. 调用 `save_script` 保存最终结果
+1. First call `read_episode_script` to read the original content
+2. Analyze the content structure (ratio of dialogue, narration, inner monologue)
+3. Call `rewrite_to_screenplay` to perform the rewrite
+4. Check the result and confirm it follows the formatted screenplay format
+5. Call `save_script` to save the final result
 
-## 注意事项
+## Notes
 
-- 心理描写可转化为角色表情/动作或画外音
-- 长段叙述拆分为多个短场景
-- 确保每个场景有明确的情绪转折点
-- 保持角色语言风格一致性
-- 场景编号连续递增（S01, S02, S03...）
-- 时间段要具体（黄昏、深夜、清晨），不要笼统写"白天"
+- Inner monologue can be converted to character expression/action or voiceover
+- Split long narrative passages into multiple short scenes
+- Make sure each scene has a clear emotional turning point
+- Keep characters' speaking style consistent
+- Scene numbers increase continuously (S01, S02, S03...)
+- Time of day must be specific (dusk, late night, early morning), not the vague "daytime"

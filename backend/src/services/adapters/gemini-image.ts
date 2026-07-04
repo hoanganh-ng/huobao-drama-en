@@ -1,10 +1,10 @@
 /**
- * Gemini 图片生成 Adapter
- * 认证: 同时兼容两种方式
- * 1. URL Query 参数 ?key=
- * 2. Header 认证（x-goog-api-key / Authorization: Bearer）
- * 请求: Google REST 风格的 contents[].parts[] 结构
- * 响应: base64 编码在 inlineData.data 中，无 URL
+ * Gemini image generation Adapter
+ * Auth: supports both methods
+ * 1. URL query param ?key=
+ * 2. Header auth (x-goog-api-key / Authorization: Bearer)
+ * Request: Google REST-style contents[].parts[] structure
+ * Response: base64 encoded in inlineData.data, no URL
  */
 import type {
   ImageProviderAdapter,
@@ -21,11 +21,11 @@ export class GeminiImageAdapter implements ImageProviderAdapter {
   provider = 'gemini'
 
   buildGenerateRequest(config: AIConfig, record: ImageGenerationRecord): ProviderRequest {
-    // Gemini 模型名格式: "models/gemini-2.5-flash-image" 或直接 "gemini-2.5-flash-image"
+    // Gemini model name format: "models/gemini-2.5-flash-image" or directly "gemini-2.5-flash-image"
     const modelName = record.model || config.model || 'gemini-2.5-flash-image'
     const model = modelName.startsWith('models/') ? modelName : `models/${modelName}`
 
-    // Google REST 风格请求体
+    // Google REST-style request body
     const parts: any[] = []
     if (record.referenceImages) {
       try {
@@ -52,7 +52,7 @@ export class GeminiImageAdapter implements ImageProviderAdapter {
       generationConfig: {
         responseModalities: ['IMAGE', 'TEXT'],
         imageConfig: {
-          // 解析 size 如 "1920x1080" -> aspectRatio
+          // Parse size, e.g. "1920x1080" -> aspectRatio
           aspectRatio: this.parseAspectRatio(record.size),
           imageSize: this.parseImageSize(record.size),
         },
@@ -102,12 +102,12 @@ export class GeminiImageAdapter implements ImageProviderAdapter {
   }
 
   parsePollResponse(result: any): ImagePollResponse {
-    // Gemini 是同步的，通常不会走到这里
+    // Gemini is synchronous, normally won't reach here
     return { status: 'completed' }
   }
 
   buildPollRequest(config: AIConfig, taskId: string): ProviderRequest {
-    // Gemini 不需要轮询，但实现接口以保持一致
+    // Gemini does not need polling, but implement the interface for consistency
     const url = new URL(joinProviderUrl(config.baseUrl, '/v1beta', `/${taskId}`))
     url.searchParams.set('key', config.apiKey)
     return {
