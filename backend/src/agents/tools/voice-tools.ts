@@ -23,6 +23,9 @@ type VoiceCacheEntry = { key: string; expires: number; voices: VbeeVoice[] }
 let voiceCache: VoiceCacheEntry | null = null
 const VOICE_TTL_MS = 10 * 60 * 1000
 
+const VOICE_INSTRUCTION =
+  "Match the most suitable voice based on the character's gender, personality, and age, and only select from the voice list available to the current episode's audio configuration."
+
 async function fetchVbeeVoices(config: any): Promise<VbeeVoice[]> {
   const settings = config.settings ? JSON.parse(config.settings) : {}
   if (!settings.app_id) throw new Error('vbee settings missing app_id')
@@ -118,14 +121,28 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
         const now = Date.now()
 
         if (voiceCache && voiceCache.key === cacheKey && voiceCache.expires > now) {
-          return { provider, voices: voiceCache.voices, cached: true }
+          const payload = {
+            provider,
+            voices: voiceCache.voices,
+            cached: true,
+            instruction: VOICE_INSTRUCTION,
+          }
+          logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length, cached: true })
+          return payload
         }
 
         try {
           if (!cfg) throw new Error('No audio config attached to episode')
           const voices = await fetchVbeeVoices(cfg)
           voiceCache = { key: cacheKey, expires: now + VOICE_TTL_MS, voices }
-          return { provider, voices, cached: false }
+          const payload = {
+            provider,
+            voices,
+            cached: false,
+            instruction: VOICE_INSTRUCTION,
+          }
+          logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length, cached: false })
+          return payload
         } catch (error: any) {
           logTaskProgress('VoiceTool', 'list-voices-degraded', {
             episodeId, provider, error: error?.message,
@@ -151,7 +168,7 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
       const payload = {
         provider,
         voices,
-        instruction: 'Match the most suitable voice based on the character\'s gender, personality, and age, and only select from the voice list available to the current episode\'s audio configuration.',
+        instruction: VOICE_INSTRUCTION,
       }
       logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length })
       return payload
