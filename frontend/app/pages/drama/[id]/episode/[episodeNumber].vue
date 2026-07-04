@@ -2459,7 +2459,7 @@ async function batchGensamples() {
     toast.info(charsvoiced.value ? 'all character voice samples generated' : 'Please assign a voice first')
     return
   }
-  const results = await Promise.allSettled(pending.map(c => characterAPI.voicesample(c.id, epId.value)))
+  const results = await Promise.allSettled(pending.map(c => characterAPI.voiceSample(c.id, epId.value)))
   const okCount = results.filter(r => r.status === 'fulfilled').length
   const failCount = results.length - okCount
   if (okCount) toast.success(`generated ${okCount}  sample files`)
@@ -2471,7 +2471,7 @@ function dobreakdown() {
   const label = cfg ? `${cfg.name} (${cfg.provider})` : 'Default'
   runAgent('storyboard_breaker', `Please break the storyboard and generate video prompts. Video model: ${label}. Please generate suitable video prompts based on this model\'s characteristics and duration limits.`, dramaId, epId.value, refresh)
 }
-async function gensample(id) { try { await characterAPI.voicesample(id, epId.value); toast.success('Sample voice generated'); refresh() } catch (e) { toast.error(e.message) } }
+async function gensample(id) { try { await characterAPI.voiceSample(id, epId.value); toast.success('Sample voice generated'); refresh() } catch (e) { toast.error(e.message) } }
 async function addshot() { await storyboardAPI.create({ episode_id: epId.value, storyboard_number: sbs.value.length + 1, title: `shot${sbs.value.length + 1}`, duration: 10 }); refresh() }
 
 function sleep(ms) {
