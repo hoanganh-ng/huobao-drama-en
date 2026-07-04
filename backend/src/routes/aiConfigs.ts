@@ -13,6 +13,7 @@ const HUOBAO_PRESET_SERVICES = [
   { serviceType: 'image', label: 'Image', provider: 'gemini', baseUrl: 'https://api.chatfire.site', model: 'gemini-3-pro-image-preview', priority: 99 },
   { serviceType: 'video', label: 'Video', provider: 'volcengine', baseUrl: 'https://api.chatfire.site/volcengine', model: 'doubao-seedance-1-5-pro-251215', priority: 98 },
   { serviceType: 'audio', label: 'Audio', provider: 'minimax', baseUrl: 'https://api.chatfire.site/minimax', model: 'speech-2.8-hd', priority: 97 },
+  { serviceType: 'audio', label: 'Audio', provider: 'vbee', baseUrl: 'https://api.vbee.vn', model: 'hn_female_ngochuyen_full_48k-fhg', priority: 96 },
 ] as const
 
 const HUOBAO_AGENT_DEFAULTS = [
