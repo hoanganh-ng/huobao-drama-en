@@ -23,11 +23,32 @@ type VoiceCacheEntry = { key: string; expires: number; voices: VbeeVoice[] }
 let voiceCache: VoiceCacheEntry | null = null
 const VOICE_TTL_MS = 10 * 60 * 1000
 
+export function clearVoiceCache() {
+  voiceCache = null
+}
+
+export async function getOrSetVoiceCache<T>(key: string, ttlMs: number, fetcher: () => Promise<T>): Promise<{ value: T; cached: boolean }> {
+  const now = Date.now()
+  if (voiceCache && voiceCache.key === key && voiceCache.expires > now) {
+    return { value: voiceCache.voices as unknown as T, cached: true }
+  }
+  const value = await fetcher()
+  voiceCache = { key, expires: now + ttlMs, voices: value as any }
+  return { value, cached: false }
+}
+
 const VOICE_INSTRUCTION =
   "Match the most suitable voice based on the character's gender, personality, and age, and only select from the voice list available to the current episode's audio configuration."
 
 export async function fetchVbeeVoices(config: any): Promise<VbeeVoice[]> {
-  const settings = config.settings ? JSON.parse(config.settings) : {}
+  let settings: any = {}
+  if (config.settings) {
+    try {
+      settings = JSON.parse(config.settings)
+    } catch (e: any) {
+      throw new Error('Vbee settings is not valid JSON: ' + (e?.message || String(e)))
+    }
+  }
   if (!settings.app_id) throw new Error('vbee settings missing app_id')
 
   const url = new URL('https://vbee.vn/api/public/v1/voices')
@@ -118,30 +139,17 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
           ? db.select().from(schema.aiServiceConfigs).where(eq(schema.aiServiceConfigs.id, episode.audioConfigId)).all()[0]
           : undefined
         const cacheKey = cfg ? `${cfg.id}:${(cfg.apiKey || '').slice(0, 6)}` : 'no-config'
-        const now = Date.now()
-
-        if (voiceCache && voiceCache.key === cacheKey && voiceCache.expires > now) {
-          const payload = {
-            provider,
-            voices: voiceCache.voices,
-            cached: true,
-            instruction: VOICE_INSTRUCTION,
-          }
-          logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length, cached: true })
-          return payload
-        }
 
         try {
           if (!cfg) throw new Error('No audio config attached to episode')
-          const voices = await fetchVbeeVoices(cfg)
-          voiceCache = { key: cacheKey, expires: now + VOICE_TTL_MS, voices }
+          const { value: voices, cached } = await getOrSetVoiceCache(cacheKey, VOICE_TTL_MS, () => fetchVbeeVoices(cfg))
           const payload = {
             provider,
             voices,
-            cached: false,
+            cached,
             instruction: VOICE_INSTRUCTION,
           }
-          logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length, cached: false })
+          logTaskSuccess('VoiceTool', 'list-voices', { episodeId, provider, count: payload.voices.length, cached })
           return payload
         } catch (error: any) {
           logTaskProgress('VoiceTool', 'list-voices-degraded', {

@@ -21,7 +21,14 @@ export class VbeeTTSAdapter implements TTSProviderAdapter {
   readonly provider = 'vbee'
 
   private readAppId(config: any): string {
-    const settings: VbeeSettings = config?.settings ? JSON.parse(config.settings) : {}
+    let settings: VbeeSettings = {}
+    if (config?.settings) {
+      try {
+        settings = JSON.parse(config.settings)
+      } catch (e: any) {
+        throw new Error('Vbee settings is not valid JSON: ' + (e?.message || String(e)))
+      }
+    }
     if (!settings.app_id) {
       throw new Error('Vbee adapter requires app_id in settings JSON')
     }
