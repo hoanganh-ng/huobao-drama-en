@@ -26,7 +26,7 @@ const VOICE_TTL_MS = 10 * 60 * 1000
 const VOICE_INSTRUCTION =
   "Match the most suitable voice based on the character's gender, personality, and age, and only select from the voice list available to the current episode's audio configuration."
 
-async function fetchVbeeVoices(config: any): Promise<VbeeVoice[]> {
+export async function fetchVbeeVoices(config: any): Promise<VbeeVoice[]> {
   const settings = config.settings ? JSON.parse(config.settings) : {}
   if (!settings.app_id) throw new Error('vbee settings missing app_id')
 
