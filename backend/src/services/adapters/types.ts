@@ -132,7 +132,23 @@ export interface TTSProviderAdapter {
 
   buildGenerateRequest(config: AIConfig, params: any): ProviderRequest
 
+  /** Parse a JSON response body. Used by adapters whose provider returns JSON. */
   parseResponse(result: any): {
+    audioHex: string
+    audioLength: number
+    sampleRate: number
+    bitrate: number
+    format: string
+    channel: number
+  }
+
+  /**
+   * Optional: parse a raw binary response body. Used when the provider streams
+   * audio bytes directly. Returns the same hex-shaped result so downstream
+   * decode-and-save logic stays unchanged. Implement either parseResponse OR
+   * parseBinaryResponse, not both.
+   */
+  parseBinaryResponse?(raw: ArrayBuffer): {
     audioHex: string
     audioLength: number
     sampleRate: number
