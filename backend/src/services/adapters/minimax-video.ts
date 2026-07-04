@@ -65,6 +65,16 @@ export class MiniMaxVideoAdapter implements VideoProviderAdapter {
   }
 
   parseGenerateResponse(result: any): VideoGenResponse {
+    // MiniMax wraps every response in base_resp. Non-zero status_code means
+    // the API rejected the request — surface the real reason instead of the
+    // misleading "no task_id" error.
+    const baseResp = result.base_resp || result.data?.base_resp
+    if (baseResp && baseResp.status_code !== 0 && baseResp.status_code !== undefined) {
+      throw new Error(
+        `MiniMax video generation failed: ${baseResp.status_msg || `status_code=${baseResp.status_code}`}`
+      )
+    }
+
     const taskId = result.task_id || result.data?.task_id
     if (taskId) {
       return { isAsync: true, taskId }

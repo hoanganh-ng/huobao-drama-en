@@ -54,6 +54,16 @@ export class MiniMaxImageAdapter implements ImageProviderAdapter {
   }
 
   parseGenerateResponse(result: any): ImageGenResponse {
+    // MiniMax wraps every response in base_resp. Non-zero status_code means
+    // the API rejected the request — surface the real reason instead of the
+    // misleading "No image URL" error.
+    const baseResp = result.base_resp || result.data?.base_resp
+    if (baseResp && baseResp.status_code !== 0 && baseResp.status_code !== undefined) {
+      throw new Error(
+        `MiniMax image generation failed: ${baseResp.status_msg || `status_code=${baseResp.status_code}`}`
+      )
+    }
+
     const imageUrl =
       result.data?.image_urls?.[0] ||
       result.data?.[0]?.url ||
