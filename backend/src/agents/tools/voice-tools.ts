@@ -8,6 +8,69 @@ import { eq } from 'drizzle-orm'
 import { now } from '../../utils/response.js'
 import { logTaskProgress, logTaskSuccess } from '../../utils/task-logger.js'
 
+type VbeeVoice = {
+  id: string
+  name: string
+  gender: 'male' | 'female' | string
+  language: string
+  traits: string
+  suitable_for: string
+  provider: string
+  demo?: string
+}
+
+type VoiceCacheEntry = { key: string; expires: number; voices: VbeeVoice[] }
+let voiceCache: VoiceCacheEntry | null = null
+const VOICE_TTL_MS = 10 * 60 * 1000
+
+async function fetchVbeeVoices(config: any): Promise<VbeeVoice[]> {
+  const settings = config.settings ? JSON.parse(config.settings) : {}
+  if (!settings.app_id) throw new Error('vbee settings missing app_id')
+
+  const url = new URL('https://vbee.vn/api/public/v1/voices')
+  url.searchParams.set('languageCode', 'vi-VN')
+  url.searchParams.set('limit', '100')
+
+  const resp = await fetch(url.toString(), {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${config.apiKey}`,
+      'app-id': settings.app_id,
+    },
+  })
+
+  if (!resp.ok) {
+    throw new Error(`Vbee voices API responded ${resp.status}`)
+  }
+
+  const json: any = await resp.json()
+  if (json?.status !== 1 || !json?.result?.voices) {
+    throw new Error('Vbee voices response missing result.voices')
+  }
+
+  return json.result.voices.map((v: any) => ({
+    id: v.code,
+    name: v.name,
+    gender: v.gender || 'neutral',
+    language: v.language_code || 'vi-VN',
+    traits: `${v.gender || 'neutral'} ${v.language_code || 'vi-VN'} voice`,
+    suitable_for: v.name?.split(' - ')[0] || 'General',
+    provider: 'vbee',
+    demo: v.demo,
+  }))
+}
+
+function openAiFallbackVoices(provider: string) {
+  return [
+    { id: 'alloy', name: 'Alloy', gender: 'Neutral', traits: 'Balanced, natural', suitable_for: 'Narration, general', language: 'Multilingual', provider },
+    { id: 'echo', name: 'Echo', gender: 'Male', traits: 'Deep, steady', suitable_for: 'Mature male, narration', language: 'Multilingual', provider },
+    { id: 'fable', name: 'Fable', gender: 'Male', traits: 'Warm, expressive', suitable_for: 'Young male, storytelling', language: 'Multilingual', provider },
+    { id: 'onyx', name: 'Onyx', gender: 'Male', traits: 'Deep, powerful', suitable_for: 'Authoritative characters, villains', language: 'Multilingual', provider },
+    { id: 'nova', name: 'Nova', gender: 'Female', traits: 'Gentle, sweet', suitable_for: 'Young women, heroines', language: 'Multilingual', provider },
+    { id: 'shimmer', name: 'Shimmer', gender: 'Female', traits: 'Bright, lively', suitable_for: 'Lively women, girls', language: 'Multilingual', provider },
+  ]
+}
+
 export function createVoiceTools(episodeId: number, dramaId: number) {
   function getEpisodeAudioProvider() {
     const [episode] = db.select().from(schema.episodes).where(eq(schema.episodes.id, episodeId)).all()
@@ -44,6 +107,33 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
     inputSchema: z.object({}),
     execute: async () => {
       const provider = getEpisodeAudioProvider() || 'minimax'
+
+      if (provider === 'vbee') {
+        // Look up audio config to read api_key + settings
+        const [episode] = db.select().from(schema.episodes).where(eq(schema.episodes.id, episodeId)).all()
+        const cfg = episode?.audioConfigId
+          ? db.select().from(schema.aiServiceConfigs).where(eq(schema.aiServiceConfigs.id, episode.audioConfigId)).all()[0]
+          : undefined
+        const cacheKey = cfg ? `${cfg.id}:${(cfg.apiKey || '').slice(0, 6)}` : 'no-config'
+        const now = Date.now()
+
+        if (voiceCache && voiceCache.key === cacheKey && voiceCache.expires > now) {
+          return { provider, voices: voiceCache.voices, cached: true }
+        }
+
+        try {
+          if (!cfg) throw new Error('No audio config attached to episode')
+          const voices = await fetchVbeeVoices(cfg)
+          voiceCache = { key: cacheKey, expires: now + VOICE_TTL_MS, voices }
+          return { provider, voices, cached: false }
+        } catch (error: any) {
+          logTaskProgress('VoiceTool', 'list-voices-degraded', {
+            episodeId, provider, error: error?.message,
+          })
+          return { provider, voices: openAiFallbackVoices(provider), degraded: true }
+        }
+      }
+
       const rows = db.select().from(schema.aiVoices).where(eq(schema.aiVoices.provider, provider)).all()
       const voices = rows.length ? rows.map(v => {
         const desc = v.description ? JSON.parse(v.description) : []
@@ -56,14 +146,7 @@ export function createVoiceTools(episodeId: number, dramaId: number) {
           language: v.language,
           provider,
         }
-      }) : [
-        { id: 'alloy', name: 'Alloy', gender: 'Neutral', traits: 'Balanced, natural', suitable_for: 'Narration, general', language: 'Multilingual', provider },
-        { id: 'echo', name: 'Echo', gender: 'Male', traits: 'Deep, steady', suitable_for: 'Mature male, narration', language: 'Multilingual', provider },
-        { id: 'fable', name: 'Fable', gender: 'Male', traits: 'Warm, expressive', suitable_for: 'Young male, storytelling', language: 'Multilingual', provider },
-        { id: 'onyx', name: 'Onyx', gender: 'Male', traits: 'Deep, powerful', suitable_for: 'Authoritative characters, villains', language: 'Multilingual', provider },
-        { id: 'nova', name: 'Nova', gender: 'Female', traits: 'Gentle, sweet', suitable_for: 'Young women, heroines', language: 'Multilingual', provider },
-        { id: 'shimmer', name: 'Shimmer', gender: 'Female', traits: 'Bright, lively', suitable_for: 'Lively women, girls', language: 'Multilingual', provider },
-      ]
+      }) : openAiFallbackVoices(provider)
 
       const payload = {
         provider,
