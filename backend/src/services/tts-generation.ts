@@ -72,8 +72,9 @@ export async function generateTTS(params: TTSParams): Promise<string> {
     throw new Error(`TTS API error ${resp.status}: ${errText}`)
   }
 
-  const result = await resp.json()
-  const parsed = adapter.parseResponse(result)
+  const parsed = adapter.parseBinaryResponse
+    ? adapter.parseBinaryResponse(await resp.arrayBuffer())
+    : adapter.parseResponse(await resp.json())
 
   // Decode hex to binary
   const buffer = Buffer.from(parsed.audioHex, 'hex')
