@@ -422,7 +422,7 @@ const cfgTestResult = ref(null)
 const cfgForm = reactive({ name: '', provider: '', api_key: '', base_url: '', modelStr: '', settings: '', service_type: 'text', priority: 0 })
 const huobaoForm = reactive({ apiKey: '' })
 const serviceTypes = [{ type: 'text', label: 'Text' }, { type: 'image', label: 'Image' }, { type: 'video', label: 'Video' }, { type: 'audio', label: 'Audio' }]
-const providers = ['ali', 'chatfire', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine', 'vbee']
+const providers = ['ali', 'chatfire', 'flow2api', 'gemini', 'minimax', 'openai', 'openrouter', 'vidu', 'volcengine', 'vbee']
 const providerSelectOptions = computed(() => providers.map(p => ({ label: p, value: p })))
 const serviceMeta = {
   text: { label: 'Text', desc: 'Text capability for Agents: script rewriting, character & scene extraction, storyboard breaking, etc.' },
@@ -445,6 +445,7 @@ const providerPresets = {
     volcengine: { label: 'Huobao Video', baseUrl: 'https://api.chatfire.site/volcengine', models: ['doubao-seedance-1-5-pro-251215'] },
     vidu: { label: 'Vidu Recommended', baseUrl: 'https://api.vidu.com', models: ['viduq3-turbo'] },
     ali: { label: 'Aliyun Recommended', baseUrl: 'https://dashscope.aliyuncs.com', models: ['wan2.6-i2v-flash'] },
+    flow2api: { label: 'Flow2API Recommended', baseUrl: 'http://localhost:8000', models: ['veo_3_1_t2v_fast_landscape'] },
   },
   audio: {
     minimax: { label: 'Huobao Audio', baseUrl: 'https://api.chatfire.site/minimax', models: ['speech-2.8-hd'] },
@@ -465,6 +466,7 @@ const endpointPrefixes = {
   volcengine: '/api/v3',
   ali: '/api/v1',
   vidu: '/ent/v2',
+  flow2api: '/v1',
 }
 
 const endpointHint = computed(() => {
