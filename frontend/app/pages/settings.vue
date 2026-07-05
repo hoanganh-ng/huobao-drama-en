@@ -445,7 +445,7 @@ const providerPresets = {
     volcengine: { label: 'Huobao Video', baseUrl: 'https://api.chatfire.site/volcengine', models: ['doubao-seedance-1-5-pro-251215'] },
     vidu: { label: 'Vidu Recommended', baseUrl: 'https://api.vidu.com', models: ['viduq3-turbo'] },
     ali: { label: 'Aliyun Recommended', baseUrl: 'https://dashscope.aliyuncs.com', models: ['wan2.6-i2v-flash'] },
-    flow2api: { label: 'Flow2API Recommended', baseUrl: 'http://localhost:8000', models: ['veo_3_1_t2v_fast_landscape'] },
+    flow2api: { label: 'Flow2API Recommended', baseUrl: 'http://localhost:8001', models: ['veo_3_1_t2v_fast_landscape'] },
   },
   audio: {
     minimax: { label: 'Huobao Audio', baseUrl: 'https://api.chatfire.site/minimax', models: ['speech-2.8-hd'] },
